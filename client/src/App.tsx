@@ -11,7 +11,7 @@ import ProductsPage from "./pages/ProductsPage";
 import AdminPanel from "./pages/AdminPanel";
 import ShoppingCart from "./components/ShoppingCart";
 import ProductModal from "./components/ProductModal";
-import CheckoutModal from "./components/CheckoutModal";
+
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -38,7 +38,6 @@ function App() {
               </main>
               <ShoppingCart />
               <ProductModal />
-              <CheckoutModal />
               <Toaster />
             </div>
           </ProductProvider>

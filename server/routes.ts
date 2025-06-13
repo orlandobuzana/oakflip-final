@@ -145,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/orders/:id/status", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const { status } = req.body;
       
       if (!["pending", "processing", "shipped", "delivered", "cancelled"].includes(status)) {
