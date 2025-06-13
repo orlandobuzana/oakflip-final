@@ -22,7 +22,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/categories/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const category = await storage.getCategoryById(id);
       if (!category) {
         return res.status(404).json({ message: "Category not found" });
@@ -40,8 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let products;
       
       if (category && typeof category === 'string') {
-        const categoryId = parseInt(category);
-        products = await storage.getProductsByCategory(categoryId);
+        products = await storage.getProductsByCategory(category);
       } else {
         products = await storage.getProducts();
       }
@@ -54,7 +53,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/products/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const product = await storage.getProductById(id);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
@@ -80,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/products/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const validatedData = insertProductSchema.partial().parse(req.body);
       const product = await storage.updateProduct(id, validatedData);
       if (!product) {
@@ -97,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/products/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const deleted = await storage.deleteProduct(id);
       if (!deleted) {
         return res.status(404).json({ message: "Product not found" });
@@ -120,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/orders/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const order = await storage.getOrderById(id);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
