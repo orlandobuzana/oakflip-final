@@ -18,6 +18,9 @@ import { apiRequest } from "@/lib/api";
 import SalesChart from "@/components/SalesChart";
 import TopProducts from "@/components/TopProducts";
 import UserManagement from "@/components/UserManagement";
+import DealsManagement from "@/components/DealsManagement";
+import UserMenu from "@/components/UserMenu";
+import ColorSchemeSelector from "@/components/ColorSchemeSelector";
 import { 
   Home, 
   Settings, 
@@ -33,7 +36,8 @@ import {
   Check,
   AlertTriangle,
   BarChart3,
-  Shield
+  Shield,
+  Tag
 } from "lucide-react";
 import type { Product, Order, DashboardStats } from "@shared/schema";
 
@@ -140,7 +144,7 @@ export default function AdminPanel() {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
       price: formData.get("price") as string,
-      categoryId: parseInt(formData.get("categoryId") as string),
+      categoryId: formData.get("categoryId") as string,
       image: formData.get("image") as string,
       images: [formData.get("image") as string],
       stock: parseInt(formData.get("stock") as string),
@@ -160,12 +164,12 @@ export default function AdminPanel() {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
       price: formData.get("price") as string,
-      categoryId: parseInt(formData.get("categoryId") as string),
+      categoryId: formData.get("categoryId") as string,
       image: formData.get("image") as string,
       stock: parseInt(formData.get("stock") as string),
       status: formData.get("status") as string,
     };
-    updateProductMutation.mutate({ id: editingProduct.id, data: productData });
+    updateProductMutation.mutate({ id: editingProduct._id!, data: productData });
   };
 
   const getStatusBadgeColor = (status: string) => {
@@ -199,10 +203,12 @@ export default function AdminPanel() {
               <h1 className="text-xl font-bold text-slate-800">Admin Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <ColorSchemeSelector />
               <Bell className="w-5 h-5 text-slate-600 hover:text-slate-800 cursor-pointer" />
               <a href="/" className="text-slate-600 hover:text-primary">
                 <Home className="w-5 h-5" />
               </a>
+              <UserMenu />
             </div>
           </div>
         </div>
@@ -210,7 +216,7 @@ export default function AdminPanel() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="dashboard" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <Home className="h-4 w-4" />
               Dashboard
@@ -226,6 +232,10 @@ export default function AdminPanel() {
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
               Orders
+            </TabsTrigger>
+            <TabsTrigger value="deals" className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Deals
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -345,8 +355,8 @@ export default function AdminPanel() {
                     </TableHeader>
                     <TableBody>
                       {orders?.slice(0, 5).map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">#{order.id}</TableCell>
+                        <TableRow key={order._id}>
+                          <TableCell className="font-medium">#{order._id}</TableCell>
                           <TableCell>{order.customerName}</TableCell>
                           <TableCell>
                             {new Date(order.createdAt).toLocaleDateString()}
@@ -487,7 +497,7 @@ export default function AdminPanel() {
                     </TableHeader>
                     <TableBody>
                       {products?.map((product) => (
-                        <TableRow key={product.id}>
+                        <TableRow key={product._id}>
                           <TableCell>
                             <div className="flex items-center space-x-3">
                               <img
@@ -521,7 +531,7 @@ export default function AdminPanel() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => deleteProductMutation.mutate(product.id)}
+                                onClick={() => deleteProductMutation.mutate(product._id!)}
                                 disabled={deleteProductMutation.isPending}
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -636,8 +646,8 @@ export default function AdminPanel() {
                     </TableHeader>
                     <TableBody>
                       {orders?.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">#{order.id}</TableCell>
+                        <TableRow key={order._id}>
+                          <TableCell className="font-medium">#{order._id}</TableCell>
                           <TableCell>{order.customerName}</TableCell>
                           <TableCell>
                             {new Date(order.createdAt).toLocaleDateString()}
@@ -647,7 +657,7 @@ export default function AdminPanel() {
                             <Select
                               value={order.status}
                               onValueChange={(status) =>
-                                updateOrderStatusMutation.mutate({ orderId: order.id, status })
+                                updateOrderStatusMutation.mutate({ orderId: order._id!, status })
                               }
                             >
                               <SelectTrigger className="w-32">
@@ -676,6 +686,11 @@ export default function AdminPanel() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Deals Tab */}
+          <TabsContent value="deals" className="space-y-8">
+            <DealsManagement />
           </TabsContent>
 
           {/* Users Tab */}
@@ -790,7 +805,7 @@ export default function AdminPanel() {
                     </TableHeader>
                     <TableBody>
                       {products?.map((product) => (
-                        <TableRow key={product.id}>
+                        <TableRow key={product._id}>
                           <TableCell>{product.name}</TableCell>
                           <TableCell className="text-slate-600">{product.sku}</TableCell>
                           <TableCell className="font-medium">{product.stock}</TableCell>

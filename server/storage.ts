@@ -4,11 +4,13 @@ import {
   type Order, 
   type OrderItem,
   type User,
+  type Deal,
   type InsertCategory, 
   type InsertProduct, 
   type InsertOrder, 
   type InsertOrderItem,
   type InsertUser,
+  type InsertDeal,
   type ProductWithCategory,
   type OrderWithItems,
   type DashboardStats,
@@ -52,6 +54,13 @@ export interface IStorage {
   updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
   updateUserStatus(id: string, status: User["status"]): Promise<User | undefined>;
   getUserManagementData(): Promise<UserManagementData>;
+
+  // Deal Management
+  getDeals(): Promise<Deal[]>;
+  getDealById(id: string): Promise<Deal | undefined>;
+  createDeal(deal: InsertDeal): Promise<Deal>;
+  updateDeal(id: string, updateData: Partial<InsertDeal>): Promise<Deal | undefined>;
+  deleteDeal(id: string): Promise<boolean>;
 }
 
 // Temporary in-memory storage implementation with string IDs
@@ -518,6 +527,47 @@ export class MemStorage implements IStorage {
       activeUsers: users.filter(u => u.status === 'active').length,
       suspendedUsers: users.filter(u => u.status === 'suspended').length
     };
+  }
+
+  // Deal Management Methods
+  private deals = new Map<string, Deal>();
+  private currentDealId = 1;
+
+  async getDeals(): Promise<Deal[]> {
+    return Array.from(this.deals.values());
+  }
+
+  async getDealById(id: string): Promise<Deal | undefined> {
+    return this.deals.get(id);
+  }
+
+  async createDeal(insertDeal: InsertDeal): Promise<Deal> {
+    const dealId = (this.currentDealId++).toString();
+    const deal: Deal = {
+      ...insertDeal,
+      _id: dealId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.deals.set(dealId, deal);
+    return deal;
+  }
+
+  async updateDeal(id: string, updateData: Partial<InsertDeal>): Promise<Deal | undefined> {
+    const deal = this.deals.get(id);
+    if (!deal) return undefined;
+
+    const updatedDeal = { 
+      ...deal, 
+      ...updateData, 
+      updatedAt: new Date().toISOString() 
+    };
+    this.deals.set(id, updatedDeal);
+    return updatedDeal;
+  }
+
+  async deleteDeal(id: string): Promise<boolean> {
+    return this.deals.delete(id);
   }
 }
 

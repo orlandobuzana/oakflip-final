@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProductSchema, insertOrderSchema, insertOrderItemSchema, insertUserSchema } from "@shared/schema";
+import { insertProductSchema, insertOrderSchema, insertOrderItemSchema, insertUserSchema, insertDealSchema } from "@shared/schema";
 import { z } from "zod";
 
 const createOrderWithItemsSchema = z.object({
@@ -271,6 +271,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       res.status(500).json({ message: "Failed to update user status" });
+    }
+  });
+
+  // Deals Management routes
+  app.get("/api/deals", async (req, res) => {
+    try {
+      const deals = await storage.getDeals();
+      res.json(deals);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch deals" });
+    }
+  });
+
+  app.get("/api/deals/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const deal = await storage.getDealById(id);
+      if (!deal) {
+        return res.status(404).json({ message: "Deal not found" });
+      }
+      res.json(deal);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch deal" });
+    }
+  });
+
+  app.post("/api/deals", async (req, res) => {
+    try {
+      const validatedData = insertDealSchema.parse(req.body);
+      const deal = await storage.createDeal(validatedData);
+      res.status(201).json(deal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid deal data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create deal" });
+    }
+  });
+
+  app.put("/api/deals/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const validatedData = insertDealSchema.partial().parse(req.body);
+      const deal = await storage.updateDeal(id, validatedData);
+      if (!deal) {
+        return res.status(404).json({ message: "Deal not found" });
+      }
+      res.json(deal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid deal data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to update deal" });
+    }
+  });
+
+  app.delete("/api/deals/:id", async (req, res) => {
+    try {
+      const id = req.params.id;
+      const success = await storage.deleteDeal(id);
+      if (!success) {
+        return res.status(404).json({ message: "Deal not found" });
+      }
+      res.json({ message: "Deal deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete deal" });
     }
   });
 

@@ -125,3 +125,29 @@ export type UserManagementData = {
   activeUsers: number;
   suspendedUsers: number;
 };
+
+// Deals schema
+const dealSchema = z.object({
+  _id: z.string().optional(),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  discountType: z.enum(["percentage", "fixed"]),
+  discountValue: z.number().min(0, "Discount value must be positive"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().min(1, "End date is required"),
+  isActive: z.boolean().default(true),
+  minOrderAmount: z.number().min(0).default(0),
+  maxUses: z.number().nullable().optional(),
+  currentUses: z.number().default(0),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const insertDealSchema = dealSchema.omit({
+  _id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type Deal = z.infer<typeof dealSchema>;
+export type InsertDeal = z.infer<typeof insertDealSchema>;
