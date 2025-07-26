@@ -20,7 +20,7 @@ import TopProducts from "@/components/TopProducts";
 import UserManagement from "@/components/UserManagement";
 import DealsManagement from "@/components/DealsManagement";
 import UserMenu from "@/components/UserMenu";
-import ColorSchemeSelector from "@/components/ColorSchemeSelector";
+
 import { 
   Home, 
   Settings, 
@@ -47,30 +47,7 @@ export default function AdminPanel() {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  // Redirect if not admin
-  useEffect(() => {
-    if (!isLoading && !isAdmin) {
-      toast({
-        title: "Access Denied",
-        description: "You need admin privileges to access this page.",
-        variant: "destructive",
-      });
-      window.location.href = "/";
-    }
-  }, [isAdmin, isLoading, toast]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return null;
-  }
-
+  // All hooks must be called before any conditional returns
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
   });
@@ -172,6 +149,31 @@ export default function AdminPanel() {
     updateProductMutation.mutate({ id: editingProduct._id!, data: productData });
   };
 
+  // Redirect if not admin - this useEffect must come after all other hooks
+  useEffect(() => {
+    if (!isLoading && !isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "You need admin privileges to access this page.",
+        variant: "destructive",
+      });
+      window.location.href = "/";
+    }
+  }, [isAdmin, isLoading, toast]);
+
+  // Early returns after all hooks
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "active":
@@ -203,7 +205,7 @@ export default function AdminPanel() {
               <h1 className="text-xl font-bold text-slate-800">Admin Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <ColorSchemeSelector />
+
               <Bell className="w-5 h-5 text-slate-600 hover:text-slate-800 cursor-pointer" />
               <a href="/" className="text-slate-600 hover:text-primary">
                 <Home className="w-5 h-5" />
