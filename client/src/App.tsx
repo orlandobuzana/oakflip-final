@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./contexts/CartContext";
 import { ProductProvider } from "./contexts/ProductContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import Header from "./components/Header";
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
@@ -29,19 +30,21 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <CartProvider>
-          <ProductProvider>
-            <div className="min-h-screen bg-slate-50">
-              <Header />
-              <main className="flex-1">
-                <Router />
-              </main>
-              <ShoppingCart />
-              <ProductModal />
-              <Toaster />
-            </div>
-          </ProductProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <ProductProvider>
+              <div className="min-h-screen bg-slate-50">
+                <Header />
+                <main className="flex-1">
+                  <Router />
+                </main>
+                <ShoppingCart />
+                <ProductModal />
+                <Toaster />
+              </div>
+            </ProductProvider>
+          </CartProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

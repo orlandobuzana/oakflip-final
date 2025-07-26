@@ -4,20 +4,25 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import LoginModal from "./LoginModal";
 import { 
   Search, 
   ShoppingCart, 
   User, 
   Store,
   Menu,
-  X
+  X,
+  LogOut
 } from "lucide-react";
 
 export default function Header() {
   const [location] = useLocation();
   const { cartCount, openCart } = useCart();
+  const { user, isAdmin, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,15 +97,28 @@ export default function Header() {
               )}
             </Button>
             
-            <Button variant="ghost" size="sm">
-              <User className="w-5 h-5" />
-            </Button>
-            
-            <Link href="/admin">
-              <Button size="sm" className="hidden sm:flex">
-                Admin Panel
+            {user ? (
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-slate-600 hidden sm:inline">
+                  {user.name}
+                </span>
+                <Button variant="ghost" size="sm" onClick={logout}>
+                  <LogOut className="w-5 h-5" />
+                </Button>
+              </div>
+            ) : (
+              <Button variant="ghost" size="sm" onClick={() => setIsLoginModalOpen(true)}>
+                <User className="w-5 h-5" />
               </Button>
-            </Link>
+            )}
+            
+            {isAdmin && (
+              <Link href="/admin">
+                <Button size="sm" className="hidden sm:flex">
+                  Admin Panel
+                </Button>
+              </Link>
+            )}
 
             {/* Mobile menu button */}
             <Button
@@ -149,15 +167,53 @@ export default function Header() {
                 </Link>
               ))}
               
-              <Link href="/admin">
-                <Button className="w-full mt-2" onClick={() => setIsMobileMenuOpen(false)}>
-                  Admin Panel
+              {!user && (
+                <Button 
+                  className="w-full mt-2" 
+                  variant="outline"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsLoginModalOpen(true);
+                  }}
+                >
+                  Login
                 </Button>
-              </Link>
+              )}
+              
+              {user && (
+                <div className="border-t pt-2 mt-2">
+                  <div className="px-3 py-2 text-sm text-slate-600">
+                    Welcome, {user.name}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full mb-2"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      logout();
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </div>
+              )}
+              
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                    Admin Panel
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         )}
       </div>
+      
+      <LoginModal 
+        isOpen={isLoginModalOpen} 
+        onClose={() => setIsLoginModalOpen(false)} 
+      />
     </header>
   );
 }
