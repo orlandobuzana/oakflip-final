@@ -3,13 +3,18 @@ import {
   type Product, 
   type Order, 
   type OrderItem,
+  type User,
   type InsertCategory, 
   type InsertProduct, 
   type InsertOrder, 
   type InsertOrderItem,
+  type InsertUser,
   type ProductWithCategory,
   type OrderWithItems,
-  type DashboardStats
+  type DashboardStats,
+  type SalesData,
+  type TopProduct,
+  type UserManagementData
 } from "@shared/schema";
 
 export interface IStorage {
@@ -35,6 +40,18 @@ export interface IStorage {
 
   // Dashboard
   getDashboardStats(): Promise<DashboardStats>;
+  
+  // Sales Analytics
+  getSalesData(days?: number): Promise<SalesData[]>;
+  getTopProducts(limit?: number): Promise<TopProduct[]>;
+  
+  // User Management
+  getUsers(): Promise<User[]>;
+  getUserById(id: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
+  updateUserStatus(id: string, status: User["status"]): Promise<User | undefined>;
+  getUserManagementData(): Promise<UserManagementData>;
 }
 
 // Temporary in-memory storage implementation with string IDs
@@ -43,25 +60,78 @@ export class MemStorage implements IStorage {
   private products: Map<string, Product>;
   private orders: Map<string, Order>;
   private orderItems: Map<string, OrderItem>;
+  private users: Map<string, User>;
   private currentCategoryId: number;
   private currentProductId: number;
   private currentOrderId: number;
   private currentOrderItemId: number;
+  private currentUserId: number;
 
   constructor() {
     this.categories = new Map();
     this.products = new Map();
     this.orders = new Map();
     this.orderItems = new Map();
+    this.users = new Map();
     this.currentCategoryId = 1;
     this.currentProductId = 1;
     this.currentOrderId = 1;
     this.currentOrderItemId = 1;
+    this.currentUserId = 1;
 
     this.initializeData();
   }
 
   private initializeData() {
+    // Initialize sample users
+    const usersData: (InsertUser & { id: string })[] = [
+      {
+        id: "1",
+        email: "admin@store.com",
+        name: "Admin User",
+        role: "admin",
+        status: "active",
+        totalOrders: 0,
+        totalSpent: "0.00"
+      },
+      {
+        id: "2", 
+        email: "customer@store.com",
+        name: "Customer User",
+        role: "customer",
+        status: "active",
+        totalOrders: 3,
+        totalSpent: "299.97"
+      },
+      {
+        id: "3",
+        email: "john.doe@email.com",
+        name: "John Doe",
+        role: "customer", 
+        status: "active",
+        totalOrders: 1,
+        totalSpent: "99.99"
+      },
+      {
+        id: "4",
+        email: "jane.smith@email.com",
+        name: "Jane Smith",
+        role: "customer",
+        status: "suspended",
+        totalOrders: 5,
+        totalSpent: "549.95"
+      }
+    ];
+
+    usersData.forEach(userData => {
+      const user: User = { 
+        ...userData, 
+        _id: userData.id,
+        createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000), // Random date within last 30 days
+        lastLogin: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) // Random date within last week
+      };
+      this.users.set(user._id!, user);
+    });
     // Initialize categories
     const categoriesData: (InsertCategory & { id: string })[] = [
       {
@@ -333,6 +403,120 @@ export class MemStorage implements IStorage {
       totalOrders: orders.length,
       totalProducts: products.length,
       activeCustomers: uniqueCustomers
+    };
+  }
+
+  // Sales Analytics Methods
+  async getSalesData(days: number = 30): Promise<SalesData[]> {
+    const orders = Array.from(this.orders.values())
+      .filter(o => o.status === 'delivered')
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+    const salesMap = new Map<string, { revenue: number; orders: number }>();
+    const endDate = new Date();
+    const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
+
+    // Initialize all dates with 0 values
+    for (let i = 0; i < days; i++) {
+      const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
+      const dateStr = date.toISOString().split('T')[0];
+      salesMap.set(dateStr, { revenue: 0, orders: 0 });
+    }
+
+    // Populate with actual data
+    orders.forEach(order => {
+      const dateStr = order.createdAt.toISOString().split('T')[0];
+      if (salesMap.has(dateStr)) {
+        const current = salesMap.get(dateStr)!;
+        salesMap.set(dateStr, {
+          revenue: current.revenue + parseFloat(order.total),
+          orders: current.orders + 1
+        });
+      }
+    });
+
+    return Array.from(salesMap.entries()).map(([date, data]) => ({
+      date,
+      revenue: data.revenue,
+      orders: data.orders
+    }));
+  }
+
+  async getTopProducts(limit: number = 10): Promise<TopProduct[]> {
+    const orderItems = Array.from(this.orderItems.values());
+    const productSales = new Map<string, { sales: number; revenue: number }>();
+
+    orderItems.forEach(item => {
+      const current = productSales.get(item.productId) || { sales: 0, revenue: 0 };
+      productSales.set(item.productId, {
+        sales: current.sales + item.quantity,
+        revenue: current.revenue + (parseFloat(item.price) * item.quantity)
+      });
+    });
+
+    const topProducts: TopProduct[] = [];
+    for (const [productId, data] of productSales.entries()) {
+      const product = this.products.get(productId);
+      if (product) {
+        topProducts.push({
+          id: productId,
+          name: product.name,
+          sales: data.sales,
+          revenue: data.revenue
+        });
+      }
+    }
+
+    return topProducts
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, limit);
+  }
+
+  // User Management Methods
+  async getUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const userId = (this.currentUserId++).toString();
+    const user: User = {
+      ...insertUser,
+      _id: userId,
+      createdAt: new Date()
+    };
+    this.users.set(userId, user);
+    return user;
+  }
+
+  async updateUser(id: string, updateData: Partial<InsertUser>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+
+    const updatedUser = { ...user, ...updateData };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserStatus(id: string, status: User["status"]): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+
+    const updatedUser = { ...user, status };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async getUserManagementData(): Promise<UserManagementData> {
+    const users = Array.from(this.users.values());
+    return {
+      users,
+      totalUsers: users.length,
+      activeUsers: users.filter(u => u.status === 'active').length,
+      suspendedUsers: users.filter(u => u.status === 'suspended').length
     };
   }
 }

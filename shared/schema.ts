@@ -80,9 +80,48 @@ export type CartItem = {
   quantity: number;
 };
 
+// User management schema
+export const userSchema = z.object({
+  _id: z.string().optional(),
+  email: z.string().email(),
+  name: z.string(),
+  role: z.enum(["admin", "customer"]).default("customer"),
+  status: z.enum(["active", "suspended", "inactive"]).default("active"),
+  createdAt: z.date().default(() => new Date()),
+  lastLogin: z.date().optional(),
+  totalOrders: z.number().default(0),
+  totalSpent: z.string().default("0.00"),
+});
+
+export const insertUserSchema = userSchema.omit({ _id: true, createdAt: true });
+
+export type User = z.infer<typeof userSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
 export type DashboardStats = {
   totalRevenue: string;
   totalOrders: number;
   totalProducts: number;
   activeCustomers: number;
+};
+
+// Sales analytics types
+export type SalesData = {
+  date: string;
+  revenue: number;
+  orders: number;
+};
+
+export type TopProduct = {
+  id: string;
+  name: string;
+  sales: number;
+  revenue: number;
+};
+
+export type UserManagementData = {
+  users: User[];
+  totalUsers: number;
+  activeUsers: number;
+  suspendedUsers: number;
 };
