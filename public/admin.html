@@ -270,6 +270,7 @@
             <div class="sidebar-item" onclick="showSection('orders')">Orders</div>
             <div class="sidebar-item" onclick="showSection('categories')">Categories</div>
             <div class="sidebar-item" onclick="showSection('users')">Users</div>
+            <div class="sidebar-item" onclick="showSection('deals')">Deals</div>
             <div class="sidebar-item" onclick="showSection('analytics')">Analytics</div>
         </aside>
 
@@ -343,6 +344,7 @@
             <!-- Users Section -->
             <div id="users" class="section">
                 <h1 class="section-title">User Management</h1>
+                <button class="btn" onclick="showAddUserModal()">Add New User</button>
                 <table class="table" id="users-table">
                     <thead>
                         <tr>
@@ -354,6 +356,37 @@
                     </thead>
                     <tbody id="users-tbody">
                         <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Deals Section -->
+            <div id="deals" class="section">
+                <h1 class="section-title">Deals Management</h1>
+                <button class="btn" onclick="showAddDealModal()">Add New Deal</button>
+                
+                <div style="margin: 2rem 0;">
+                    <h3>Deals Analytics</h3>
+                    <div class="stats-grid" id="deals-stats" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                        <!-- Deals stats will be loaded here -->
+                    </div>
+                </div>
+
+                <table class="table" id="deals-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Discount %</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                            <th>Orders</th>
+                            <th>Revenue</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deals-tbody">
+                        <!-- Deals will be loaded here -->
                     </tbody>
                 </table>
             </div>
@@ -436,6 +469,102 @@
         </div>
     </div>
 
+    <!-- Add User Modal -->
+    <div id="add-user-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('add-user-modal')">&times;</button>
+            <h2>Add New User</h2>
+            <form id="add-user-form">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select name="role" class="form-input" required>
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Add User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('edit-user-modal')">&times;</button>
+            <h2>Edit User</h2>
+            <form id="edit-user-form">
+                <input type="hidden" name="id" id="edit-user-id">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" id="edit-user-name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" id="edit-user-email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select name="role" id="edit-user-role" class="form-input" required>
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Update User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Deal Modal -->
+    <div id="add-deal-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('add-deal-modal')">&times;</button>
+            <h2>Add New Deal</h2>
+            <form id="add-deal-form">
+                <div class="form-group">
+                    <label class="form-label">Deal Title</label>
+                    <input type="text" name="title" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-textarea" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Discount Percentage</label>
+                    <input type="number" name="discount" class="form-input" min="1" max="90" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Start Date</label>
+                    <input type="datetime-local" name="startDate" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">End Date</label>
+                    <input type="datetime-local" name="endDate" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Deal Type</label>
+                    <select name="type" class="form-input" required>
+                        <option value="percentage">Percentage Discount</option>
+                        <option value="fixed">Fixed Amount</option>
+                        <option value="bogo">Buy One Get One</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Add Deal</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         let categories = [];
         let products = [];
@@ -478,7 +607,9 @@
                 loadOrders(),
                 loadCategories(),
                 loadUsers(),
-                loadTopProducts()
+                loadTopProducts(),
+                loadDeals(),
+                loadDealsAnalytics()
             ]);
         }
 
@@ -603,7 +734,8 @@
                         <td>${user.email}</td>
                         <td>${user.role}</td>
                         <td>
-                            <button class="btn">Edit</button>
+                            <button class="btn" onclick="editUser('${user.id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -660,8 +792,115 @@
             document.getElementById('add-category-modal').style.display = 'block';
         }
 
+        function showAddUserModal() {
+            document.getElementById('add-user-modal').style.display = 'block';
+        }
+
+        function showAddDealModal() {
+            document.getElementById('add-deal-modal').style.display = 'block';
+        }
+
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+        }
+
+        // User Management Functions
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                document.getElementById('edit-user-id').value = user.id;
+                document.getElementById('edit-user-name').value = user.name;
+                document.getElementById('edit-user-email').value = user.email;
+                document.getElementById('edit-user-role').value = user.role;
+                document.getElementById('edit-user-modal').style.display = 'block';
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                try {
+                    await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+                    loadUsers();
+                } catch (error) {
+                    alert('Failed to delete user');
+                }
+            }
+        }
+
+        // Deals Management Functions
+        let deals = [];
+
+        async function loadDeals() {
+            try {
+                const response = await fetch('/api/deals');
+                deals = await response.json();
+                
+                document.getElementById('deals-tbody').innerHTML = deals.map(deal => `
+                    <tr>
+                        <td>${deal.title}</td>
+                        <td>${deal.discount}%</td>
+                        <td>${new Date(deal.startDate).toLocaleDateString()}</td>
+                        <td>${new Date(deal.endDate).toLocaleDateString()}</td>
+                        <td><span class="status-badge ${deal.status}">${deal.status}</span></td>
+                        <td>${deal.orders || 0}</td>
+                        <td>$${(deal.revenue || 0).toFixed(2)}</td>
+                        <td>
+                            <button class="btn" onclick="editDeal('${deal.id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteDeal('${deal.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load deals:', error);
+            }
+        }
+
+        async function loadDealsAnalytics() {
+            try {
+                const response = await fetch('/api/deals/analytics');
+                const analytics = await response.json();
+                
+                document.getElementById('deals-stats').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-value">${analytics.activeDeals || 0}</div>
+                        <div class="stat-label">Active Deals</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">$${(analytics.dealsRevenue || 0).toFixed(2)}</div>
+                        <div class="stat-label">Deals Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${analytics.dealsOrders || 0}</div>
+                        <div class="stat-label">Orders from Deals</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${(analytics.avgDiscount || 0).toFixed(1)}%</div>
+                        <div class="stat-label">Avg Discount</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Failed to load deals analytics:', error);
+            }
+        }
+
+        function editDeal(dealId) {
+            const deal = deals.find(d => d.id === dealId);
+            if (deal) {
+                // Populate edit modal (would need to create edit deal modal)
+                alert('Edit deal functionality - would open edit modal');
+            }
+        }
+
+        async function deleteDeal(dealId) {
+            if (confirm('Are you sure you want to delete this deal?')) {
+                try {
+                    await fetch(`/api/deals/${dealId}`, { method: 'DELETE' });
+                    loadDeals();
+                    loadDealsAnalytics();
+                } catch (error) {
+                    alert('Failed to delete deal');
+                }
+            }
         }
 
         async function deleteProduct(productId) {
@@ -726,6 +965,69 @@
                 e.target.reset();
             } catch (error) {
                 alert('Failed to add category');
+            }
+        });
+
+        // Add User Form
+        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const userData = Object.fromEntries(formData);
+
+            try {
+                await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                closeModal('add-user-modal');
+                loadUsers();
+                e.target.reset();
+            } catch (error) {
+                alert('Failed to add user');
+            }
+        });
+
+        // Edit User Form
+        document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const userData = Object.fromEntries(formData);
+            const userId = userData.id;
+            delete userData.id;
+
+            try {
+                await fetch(`/api/users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                closeModal('edit-user-modal');
+                loadUsers();
+            } catch (error) {
+                alert('Failed to update user');
+            }
+        });
+
+        // Add Deal Form
+        document.getElementById('add-deal-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const dealData = Object.fromEntries(formData);
+            dealData.discount = parseInt(dealData.discount);
+
+            try {
+                await fetch('/api/deals', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dealData)
+                });
+                closeModal('add-deal-modal');
+                loadDeals();
+                loadDealsAnalytics();
+                e.target.reset();
+            } catch (error) {
+                alert('Failed to add deal');
             }
         });
 

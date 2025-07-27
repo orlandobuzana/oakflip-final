@@ -233,15 +233,31 @@
                     <select id="category-filter" onchange="filterByCategory()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd; min-width: 120px;">
                         <option value="">All Categories</option>
                     </select>
-                    <div id="auth-section" style="display: flex; align-items: center; gap: 1rem;">
-                        <button id="signup-btn" onclick="showSignup()" style="color: #059669; background: none; border: 1px solid #059669; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Sign Up</button>
-                        <button id="login-btn" onclick="showLogin()" style="color: #2563eb; background: none; border: 1px solid #2563eb; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Login</button>
-                        <div id="user-section" style="display: none; gap: 1rem; align-items: center;">
-                            <span id="user-name" style="font-weight: bold; color: #374151;"></span>
-                            <div id="admin-section" style="display: none; gap: 1rem;">
-                                <a href="/admin" style="color: #2563eb; text-decoration: none; padding: 0.5rem 1rem; border: 1px solid #2563eb; border-radius: 4px; font-size: 0.9rem;">Admin Panel</a>
+                    <div id="auth-section" style="position: relative;">
+                        <!-- User Menu Button -->
+                        <button id="user-menu-btn" onclick="toggleUserMenu()" style="color: #374151; background: none; border: 1px solid #d1d5db; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span id="menu-user-text">Account</span>
+                            <span id="menu-arrow" style="transform: rotate(0deg); transition: transform 0.2s;">▼</span>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div id="user-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border: 1px solid #d1d5db; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; z-index: 1000; margin-top: 0.5rem;">
+                            <!-- Not logged in options -->
+                            <div id="guest-options">
+                                <button onclick="showLogin(); toggleUserMenu();" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; color: #374151; border-bottom: 1px solid #f3f4f6;">Login</button>
+                                <button onclick="showSignup(); toggleUserMenu();" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; color: #374151;">Sign Up</button>
                             </div>
-                            <button onclick="logout()" style="color: #dc2626; background: none; border: 1px solid #dc2626; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Logout</button>
+
+                            <!-- Logged in options -->
+                            <div id="user-options" style="display: none;">
+                                <div style="padding: 0.75rem 1rem; border-bottom: 1px solid #f3f4f6; background: #f8fafc;">
+                                    <span id="dropdown-user-name" style="font-weight: bold; color: #374151;"></span>
+                                </div>
+                                <div id="admin-dropdown-section" style="display: none;">
+                                    <a href="/admin" onclick="toggleUserMenu();" style="display: block; width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; color: #2563eb; text-decoration: none; border-bottom: 1px solid #f3f4f6;">Admin Panel</a>
+                                </div>
+                                <button onclick="logout(); toggleUserMenu();" style="width: 100%; text-align: left; padding: 0.75rem 1rem; border: none; background: none; cursor: pointer; color: #dc2626;">Logout</button>
+                            </div>
                         </div>
                     </div>
                     <div class="cart-info" onclick="toggleCart()" style="margin-left: auto;">
@@ -648,23 +664,53 @@
         }
 
         function showAdminUI(user) {
-            document.getElementById('signup-btn').style.display = 'none';
-            document.getElementById('login-btn').style.display = 'none';
-            document.getElementById('user-section').style.display = 'flex';
-            document.getElementById('user-name').textContent = `Welcome, ${user.name}`;
+            // Update menu button text
+            document.getElementById('menu-user-text').textContent = user.name;
+            
+            // Show user options, hide guest options
+            document.getElementById('guest-options').style.display = 'none';
+            document.getElementById('user-options').style.display = 'block';
+            document.getElementById('dropdown-user-name').textContent = user.name;
+            
+            // Show admin section if user is admin
             if (user.role === 'admin') {
-                document.getElementById('admin-section').style.display = 'flex';
+                document.getElementById('admin-dropdown-section').style.display = 'block';
             }
         }
 
         function logout() {
             localStorage.removeItem('currentUser');
-            document.getElementById('signup-btn').style.display = 'block';
-            document.getElementById('login-btn').style.display = 'block';
-            document.getElementById('user-section').style.display = 'none';
-            document.getElementById('admin-section').style.display = 'none';
+            
+            // Reset menu to guest state
+            document.getElementById('menu-user-text').textContent = 'Account';
+            document.getElementById('guest-options').style.display = 'block';
+            document.getElementById('user-options').style.display = 'none';
+            document.getElementById('admin-dropdown-section').style.display = 'none';
+            
             showSuccess('Logged out successfully');
         }
+
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('user-dropdown');
+            const arrow = document.getElementById('menu-arrow');
+            
+            if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+                dropdown.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                dropdown.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const authSection = document.getElementById('auth-section');
+            if (!authSection.contains(event.target)) {
+                document.getElementById('user-dropdown').style.display = 'none';
+                document.getElementById('menu-arrow').style.transform = 'rotate(0deg)';
+            }
+        });
 
         async function handleLogin(email, password) {
             try {

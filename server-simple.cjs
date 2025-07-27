@@ -74,6 +74,33 @@ let categories = [
   { id: '4', name: 'Home & Garden', description: 'Home improvement and garden supplies' }
 ];
 
+let deals = [
+  {
+    id: '1',
+    title: 'Weekend Electronics Sale',
+    description: 'Get great deals on electronics this weekend',
+    discount: 25,
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'active',
+    type: 'percentage',
+    orders: 15,
+    revenue: 2500.00
+  },
+  {
+    id: '2',
+    title: 'Flash Sale - Limited Time',
+    description: 'Flash sale on selected items',
+    discount: 40,
+    startDate: new Date().toISOString(),
+    endDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'active',
+    type: 'percentage',
+    orders: 8,
+    revenue: 1200.00
+  }
+];
+
 let orders = [];
 let users = [
   { id: '1', email: 'admin@store.com', password: 'admin123', role: 'admin', name: 'Admin User' },
@@ -338,6 +365,58 @@ app.get('/api/dashboard/stats', (req, res) => {
     lowStockProducts,
     totalUsers: users.length,
     conversionRate: orders.length > 0 ? (analytics.conversions.length / analytics.pageViews * 100).toFixed(2) : 0
+  });
+});
+
+// Deals Management Routes
+app.get('/api/deals', (req, res) => {
+  res.json(deals);
+});
+
+app.post('/api/deals', (req, res) => {
+  const deal = {
+    id: Date.now().toString(),
+    ...req.body,
+    status: 'active',
+    orders: 0,
+    revenue: 0
+  };
+  deals.push(deal);
+  res.status(201).json(deal);
+});
+
+app.put('/api/deals/:id', (req, res) => {
+  const index = deals.findIndex(d => d.id === req.params.id);
+  if (index !== -1) {
+    deals[index] = { ...deals[index], ...req.body };
+    res.json(deals[index]);
+  } else {
+    res.status(404).json({ message: 'Deal not found' });
+  }
+});
+
+app.delete('/api/deals/:id', (req, res) => {
+  const index = deals.findIndex(d => d.id === req.params.id);
+  if (index !== -1) {
+    deals.splice(index, 1);
+    res.status(204).send();
+  } else {
+    res.status(404).json({ message: 'Deal not found' });
+  }
+});
+
+// Deals Analytics
+app.get('/api/deals/analytics', (req, res) => {
+  const activeDeals = deals.filter(deal => deal.status === 'active').length;
+  const totalRevenue = deals.reduce((sum, deal) => sum + (deal.revenue || 0), 0);
+  const totalOrders = deals.reduce((sum, deal) => sum + (deal.orders || 0), 0);
+  const avgDiscount = deals.length > 0 ? deals.reduce((sum, deal) => sum + deal.discount, 0) / deals.length : 0;
+
+  res.json({
+    activeDeals,
+    dealsRevenue: totalRevenue,
+    dealsOrders: totalOrders,
+    avgDiscount
   });
 });
 
