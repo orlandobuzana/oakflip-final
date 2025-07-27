@@ -811,6 +811,24 @@
             
             // Add active class to clicked sidebar item
             event.target.classList.add('active');
+            
+            // Load section-specific data
+            if (sectionName === 'products') loadProducts();
+            if (sectionName === 'orders') loadOrders();
+            if (sectionName === 'categories') loadCategories();
+            if (sectionName === 'users') loadUsers();
+            if (sectionName === 'deals') loadDeals();
+            if (sectionName === 'reviews') loadPendingReviews();
+            if (sectionName === 'analytics') loadAnalytics();
+            
+            // Load section-specific data
+            if (sectionName === 'products') loadProducts();
+            if (sectionName === 'orders') loadOrders();
+            if (sectionName === 'categories') loadCategories();
+            if (sectionName === 'users') loadUsers();
+            if (sectionName === 'deals') loadDeals();
+            if (sectionName === 'reviews') loadPendingReviews();
+            if (sectionName === 'analytics') loadAnalytics();
         }
 
         function showAddProductModal() {
@@ -1104,7 +1122,7 @@
                         <td>${new Date(review.createdAt).toLocaleDateString()}</td>
                         <td>
                             ${!review.approved ? `<button class="btn" onclick="approveReview('${review.id}')">Approve</button>` : ''}
-                            <button class="btn-danger" onclick="deleteReview('${review.id}')">Delete</button>
+                            <button class="btn btn-danger" onclick="deleteReview('${review.id}')">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -1138,7 +1156,7 @@
                 
                 if (response.ok) {
                     showSuccess('Review deleted successfully');
-                    loadAllReviews();
+                    loadPendingReviews(); // Reload current view
                 } else {
                     throw new Error('Failed to delete review');
                 }
