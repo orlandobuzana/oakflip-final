@@ -76,8 +76,8 @@ let categories = [
 
 let orders = [];
 let users = [
-  { id: '1', email: 'admin@store.com', role: 'admin', name: 'Admin User' },
-  { id: '2', email: 'customer@email.com', role: 'customer', name: 'Demo Customer' }
+  { id: '1', email: 'admin@store.com', password: 'admin123', role: 'admin', name: 'Admin User' },
+  { id: '2', email: 'customer@email.com', password: 'password123', role: 'customer', name: 'Demo Customer' }
 ];
 let analytics = { 
   pageViews: 0, 
@@ -204,6 +204,21 @@ app.post('/api/users', (req, res) => {
   };
   users.push(newUser);
   res.status(201).json({ ...newUser, password: undefined });
+});
+
+// Authentication routes
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  const user = users.find(u => u.email === email && u.password === password);
+  
+  if (!user) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+  
+  // Return user without password
+  const { password: _, ...userWithoutPassword } = user;
+  res.json(userWithoutPassword);
 });
 
 // Analytics

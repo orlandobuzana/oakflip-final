@@ -227,7 +227,13 @@
                     <select id="category-filter" onchange="filterByCategory()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd; min-width: 120px;">
                         <option value="">All Categories</option>
                     </select>
-                    <a href="/admin" style="color: #2563eb; text-decoration: none; padding: 0.5rem 1rem; border: 1px solid #2563eb; border-radius: 4px; font-size: 0.9rem;">Admin Panel</a>
+                    <div id="auth-section" style="display: flex; align-items: center; gap: 1rem;">
+                        <button id="login-btn" onclick="showLogin()" style="color: #2563eb; background: none; border: 1px solid #2563eb; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Login</button>
+                        <div id="admin-section" style="display: none; gap: 1rem;">
+                            <a href="/admin" style="color: #2563eb; text-decoration: none; padding: 0.5rem 1rem; border: 1px solid #2563eb; border-radius: 4px; font-size: 0.9rem;">Admin Panel</a>
+                            <button onclick="logout()" style="color: #dc2626; background: none; border: 1px solid #dc2626; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Logout</button>
+                        </div>
+                    </div>
                     <div class="cart-info" onclick="toggleCart()" style="margin-left: auto;">
                         Cart (<span id="cart-count">0</span>) - $<span id="cart-total">0.00</span>
                     </div>
@@ -257,6 +263,28 @@
                 Total: $<span id="modal-cart-total">0.00</span>
             </div>
             <button class="btn" onclick="checkout()" id="checkout-btn">Checkout</button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="cart-modal">
+        <div class="cart-content">
+            <button class="close-btn" onclick="closeLogin()">&times;</button>
+            <h2>Admin Login</h2>
+            <form id="login-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Email:</label>
+                    <input type="email" id="login-email" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Password:</label>
+                    <input type="password" id="login-password" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                Demo admin: admin@store.com / admin123
+            </p>
         </div>
     </div>
 
@@ -469,9 +497,77 @@
             document.getElementById('loading').style.display = 'none';
         }
 
+        // Authentication functions
+        function checkAuthStatus() {
+            const user = localStorage.getItem('currentUser');
+            if (user) {
+                const userData = JSON.parse(user);
+                if (userData.role === 'admin') {
+                    showAdminUI(userData);
+                }
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('login-modal').style.display = 'block';
+        }
+
+        function closeLogin() {
+            document.getElementById('login-modal').style.display = 'none';
+        }
+
+        function showAdminUI(user) {
+            document.getElementById('login-btn').style.display = 'none';
+            document.getElementById('admin-section').style.display = 'flex';
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            document.getElementById('login-btn').style.display = 'block';
+            document.getElementById('admin-section').style.display = 'none';
+            showSuccess('Logged out successfully');
+        }
+
+        async function handleLogin(email, password) {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Invalid credentials');
+                }
+
+                const user = await response.json();
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                if (user.role === 'admin') {
+                    showAdminUI(user);
+                    showSuccess(`Welcome back, ${user.name}!`);
+                } else {
+                    showSuccess(`Welcome, ${user.name}!`);
+                }
+                
+                closeLogin();
+            } catch (error) {
+                showError('Invalid email or password');
+            }
+        }
+
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            handleLogin(email, password);
+        });
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
             loadProducts();
+            checkAuthStatus();
             trackEvent('page_view', { page: 'home' });
         });
 
