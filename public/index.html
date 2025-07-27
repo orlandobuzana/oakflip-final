@@ -448,25 +448,76 @@
         <div class="cart-content">
             <button class="close-btn" onclick="closeSignup()">&times;</button>
             <h2>Create Account</h2>
+            
             <form id="signup-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Full Name:</label>
-                    <input type="text" id="signup-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                <!-- Personal Information -->
+                <div style="border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <h3 style="margin: 0 0 1rem 0; color: #374151; font-size: 1.1rem;">Account Information</h3>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Full Name:</label>
+                        <input type="text" id="signup-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Email:</label>
+                        <input type="email" id="signup-email" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Password:</label>
+                        <input type="password" id="signup-password" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Confirm Password:</label>
+                        <input type="password" id="signup-confirm" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
                 </div>
+
+                <!-- Shipping Address -->
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Email:</label>
-                    <input type="email" id="signup-email" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                    <h3 style="margin: 0 0 1rem 0; color: #374151; font-size: 1.1rem;">Shipping Address</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Phone Number:</label>
+                            <input type="tel" id="signup-phone" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="(555) 123-4567">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Country:</label>
+                            <select id="signup-country" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                                <option value="US">United States</option>
+                                <option value="CA">Canada</option>
+                                <option value="MX">Mexico</option>
+                                <option value="GB">United Kingdom</option>
+                                <option value="FR">France</option>
+                                <option value="DE">Germany</option>
+                                <option value="AU">Australia</option>
+                                <option value="BR">Brazil</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Street Address:</label>
+                        <input type="text" id="signup-address" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="123 Main Street">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">City:</label>
+                            <input type="text" id="signup-city" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="New York">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">State/Province:</label>
+                            <input type="text" id="signup-state" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="NY">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">ZIP/Postal Code:</label>
+                            <input type="text" id="signup-zip" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;" placeholder="10001">
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Password:</label>
-                    <input type="password" id="signup-password" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Confirm Password:</label>
-                    <input type="password" id="signup-confirm" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
-                </div>
-                <button type="submit" class="btn">Create Account</button>
+                
+                <button type="submit" class="btn" style="margin-top: 1rem;">Create Account</button>
             </form>
+
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
                 Already have an account? <a href="#" onclick="showLogin(); closeSignup();" style="color: #2563eb;">Login here</a>
             </p>
@@ -1282,12 +1333,24 @@
             document.getElementById('signup-modal').style.display = 'none';
         }
 
-        async function handleSignup(name, email, password) {
+        async function handleSignup(name, email, password, shippingAddress = null) {
             try {
+                const userData = { 
+                    name, 
+                    email, 
+                    password, 
+                    role: 'customer' 
+                };
+                
+                // Add shipping address if provided
+                if (shippingAddress) {
+                    userData.shippingAddress = shippingAddress;
+                }
+
                 const response = await fetch('/api/auth/signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password, role: 'customer' })
+                    body: JSON.stringify(userData)
                 });
 
                 if (!response.ok) {
@@ -1497,12 +1560,28 @@
             const password = document.getElementById('signup-password').value;
             const confirm = document.getElementById('signup-confirm').value;
             
+            // Get shipping address fields
+            const phone = document.getElementById('signup-phone').value;
+            const address = document.getElementById('signup-address').value;
+            const city = document.getElementById('signup-city').value;
+            const state = document.getElementById('signup-state').value;
+            const zip = document.getElementById('signup-zip').value;
+            const country = document.getElementById('signup-country').value;
+            
             if (password !== confirm) {
                 showError('Passwords do not match');
                 return;
             }
             
-            handleSignup(name, email, password);
+            // Include shipping address in signup
+            handleSignup(name, email, password, {
+                phone,
+                address,
+                city,
+                state,
+                zip,
+                country
+            });
         });
 
         document.getElementById('login-form').addEventListener('submit', (e) => {

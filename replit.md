@@ -18,6 +18,9 @@ Preferred communication style: Simple, everyday language.
 - Enhanced admin dashboard with color-coded statistics and recent activity section
 - Removed dashboard functions from customer-facing home page
 - Improved admin panel overview with proper metrics display
+- Added comprehensive shipping address fields to signup form (street, city, state, postal code, country)
+- Enhanced signup form with organized sections for account info and shipping details
+- Updated form handler to collect and store shipping address during registration
 
 ### Dedicated Product Detail Pages & Sale Indicators (January 27, 2025)
 - Created full-screen dedicated product detail pages replacing modal expansion
