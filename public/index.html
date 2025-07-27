@@ -281,12 +281,35 @@
 
 
 
-    <!-- Special Deals Products -->
-    <section id="deals-products" style="margin-bottom: 2rem;">
-        <div class="container">
-            <h3 style="text-align: center; margin-bottom: 1.5rem; color: #374151;">🎯 Featured Deals</h3>
-            <div id="deals-container" class="products-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                <!-- Deals products will be loaded here -->
+    <!-- Dashboard Overview Section -->
+    <section id="dashboard-overview" style="margin-bottom: 2rem; background: #f8fafc;">
+        <div class="container" style="padding: 2rem 0;">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #374151; font-size: 2rem;">📊 Store Overview</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <!-- Total Products -->
+                <div style="background: white; padding: 1.5rem; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #2563eb; margin-bottom: 0.5rem;" id="total-products">6</div>
+                    <div style="color: #6b7280; font-weight: 500;">Total Products</div>
+                </div>
+                
+                <!-- Categories -->
+                <div style="background: white; padding: 1.5rem; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #059669; margin-bottom: 0.5rem;" id="total-categories">3</div>
+                    <div style="color: #6b7280; font-weight: 500;">Categories</div>
+                </div>
+                
+                <!-- On Sale Items -->
+                <div style="background: white; padding: 1.5rem; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #ef4444; margin-bottom: 0.5rem;" id="sale-items">2</div>
+                    <div style="color: #6b7280; font-weight: 500;">Sale Items</div>
+                </div>
+                
+                <!-- Cart Value -->
+                <div style="background: white; padding: 1.5rem; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2.5rem; font-weight: bold; color: #f59e0b; margin-bottom: 0.5rem;">$<span id="dashboard-cart-total">0.00</span></div>
+                    <div style="color: #6b7280; font-weight: 500;">Cart Total</div>
+                </div>
             </div>
         </div>
     </section>
@@ -697,6 +720,13 @@
             displayProducts(filteredProducts);
         }
 
+        function updateDashboard() {
+            // Update dashboard stats
+            document.getElementById('total-products').textContent = products.length;
+            document.getElementById('sale-items').textContent = products.filter(p => p.onSale).length;
+            document.getElementById('dashboard-cart-total').textContent = calculateCartTotal().toFixed(2);
+        }
+
         function displayProducts(productsToShow = products) {
             const container = document.getElementById('products-container');
             
@@ -772,7 +802,7 @@
             
             container.style.display = 'grid';
             container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(400px, 1fr))';
-            container.style.gap = '1.5rem';
+            container.style.gap = '1rem';
             container.style.justifyItems = 'center';
         }
         
@@ -983,6 +1013,7 @@
             }
 
             updateCartDisplay();
+            updateDashboard();
             showSuccess(`${product.name} added to cart!`);
             
             // Track analytics
@@ -1704,6 +1735,9 @@
             
             // Load all product reviews
             loadAllReviews();
+            
+            // Update dashboard
+            updateDashboard();
         });
 
         async function loadAllReviews() {
@@ -1755,6 +1789,7 @@
         async function loadProductsAndDeals() {
             await loadProducts();
             displayDeals();
+            updateDashboard();
         }
 
         // Close cart modal when clicking outside

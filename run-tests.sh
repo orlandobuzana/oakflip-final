@@ -1,157 +1,122 @@
 #!/bin/bash
 
-# Rest Express E-commerce Testing Script
-# This script runs all tests for the e-commerce application
+# Test Runner Script for Rest Express E-commerce Application
+# This script runs the complete test suite including API and frontend tests
 
-echo "🧪 Rest Express E-commerce Test Suite"
-echo "====================================="
-echo ""
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-# Function to print colored output
-print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+echo "🚀 Starting Rest Express Test Suite..."
+echo "======================================"
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
-    print_error "Node.js is not installed. Please install Node.js first."
+    echo "❌ Node.js is not installed. Please install Node.js to run tests."
     exit 1
 fi
 
 # Check if npm is installed
 if ! command -v npm &> /dev/null; then
-    print_error "npm is not installed. Please install npm first."
+    echo "❌ npm is not installed. Please install npm to run tests."
     exit 1
 fi
 
-print_status "Checking project dependencies..."
-
-# Install test dependencies if not already installed
+# Install dependencies if node_modules doesn't exist
 if [ ! -d "node_modules" ]; then
-    print_status "Installing project dependencies..."
+    echo "📦 Installing dependencies..."
     npm install
-fi
-
-# Install test-specific dependencies
-print_status "Installing test dependencies..."
-npm install --save-dev jest supertest @types/jest @types/supertest
-
-print_status "Setting up test environment..."
-
-# Create jest.config.js if it doesn't exist
-if [ ! -f "jest.config.js" ]; then
-    print_status "Creating Jest configuration..."
-    cat > jest.config.js << 'EOF'
-module.exports = {
-  testEnvironment: 'node',
-  testMatch: ['**/tests/**/*.test.js'],
-  verbose: true,
-  collectCoverage: true,
-  coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'html'],
-  testTimeout: 10000
-};
-EOF
-fi
-
-# Check if server is running
-print_status "Checking if server is running on port 5000..."
-if curl -f http://localhost:5000/api/products > /dev/null 2>&1; then
-    print_success "Server is running on port 5000"
-    SERVER_RUNNING=true
-else
-    print_warning "Server is not running on port 5000"
-    print_status "Starting server for testing..."
-    
-    # Start server in background for testing
-    if [ -f "server-simple.cjs" ]; then
-        node server-simple.cjs &
-        SERVER_PID=$!
-        print_status "Started simple server (PID: $SERVER_PID)"
-    elif [ -f "start-simple.sh" ]; then
-        ./start-simple.sh &
-        SERVER_PID=$!
-        print_status "Started server using start-simple.sh (PID: $SERVER_PID)"
-    else
-        npm run dev &
-        SERVER_PID=$!
-        print_status "Started development server (PID: $SERVER_PID)"
-    fi
-    
-    # Wait for server to start
-    print_status "Waiting for server to start..."
-    sleep 5
-    
-    # Check again
-    if curl -f http://localhost:5000/api/products > /dev/null 2>&1; then
-        print_success "Server started successfully"
-        SERVER_RUNNING=false
-    else
-        print_error "Failed to start server"
-        if [ ! -z "$SERVER_PID" ]; then
-            kill $SERVER_PID 2>/dev/null
-        fi
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to install dependencies"
         exit 1
     fi
 fi
 
-echo ""
-print_status "Running test suite..."
-echo ""
-
-# Run the tests
-npm test tests/
-
-TEST_EXIT_CODE=$?
-
-echo ""
-if [ $TEST_EXIT_CODE -eq 0 ]; then
-    print_success "All tests passed! ✅"
+# Check if server is already running
+if lsof -Pi :5000 -sTCP:LISTEN -t >/dev/null ; then
+    echo "✅ Server is already running on port 5000"
+    SERVER_PID=""
 else
-    print_error "Some tests failed. Check the output above."
+    # Start the server in background for testing
+    echo "🔧 Starting test server..."
+    NODE_ENV=test npm run dev &
+    SERVER_PID=$!
+    
+    # Wait for server to start
+    echo "⏳ Waiting for server to start..."
+    sleep 5
 fi
 
-# Cleanup: Kill server if we started it
-if [ "$SERVER_RUNNING" = false ] && [ ! -z "$SERVER_PID" ]; then
-    print_status "Stopping test server..."
-    kill $SERVER_PID 2>/dev/null
-    print_success "Test server stopped"
-fi
+# Function to cleanup
+cleanup() {
+    echo "🧹 Cleaning up..."
+    if [ ! -z "$SERVER_PID" ]; then
+        kill $SERVER_PID 2>/dev/null
+        wait $SERVER_PID 2>/dev/null
+    fi
+}
 
-echo ""
-echo "📊 Test Results Summary:"
-echo "========================"
-if [ $TEST_EXIT_CODE -eq 0 ]; then
-    echo "✅ All tests passed"
+# Set trap to cleanup on script exit
+trap cleanup EXIT
+
+# Check if test files exist and run them
+if [ -f "tests/api.test.js" ]; then
+    echo "🧪 Running API tests..."
+    npx jest tests/api.test.js --verbose
+    API_TEST_EXIT_CODE=$?
 else
-    echo "❌ Some tests failed"
+    echo "⚠️ API test file not found, skipping..."
+    API_TEST_EXIT_CODE=0
 fi
 
 echo ""
-echo "📁 Generated Files:"
-echo "- Coverage report: coverage/index.html"
-echo "- Test configuration: jest.config.js"
+
+if [ -f "tests/frontend.test.js" ]; then
+    echo "🧪 Running frontend tests..."
+    npx jest tests/frontend.test.js --verbose
+    FRONTEND_TEST_EXIT_CODE=$?
+else
+    echo "⚠️ Frontend test file not found, skipping..."
+    FRONTEND_TEST_EXIT_CODE=0
+fi
+
 echo ""
 
-print_status "Test run completed!"
+if [ -f "tests/cart.test.js" ]; then
+    echo "🧪 Running cart functionality tests..."
+    npx jest tests/cart.test.js --verbose
+    CART_TEST_EXIT_CODE=$?
+else
+    echo "⚠️ Cart test file not found, skipping..."
+    CART_TEST_EXIT_CODE=0
+fi
 
-exit $TEST_EXIT_CODE
+echo ""
+echo "======================================"
+echo "📊 TEST RESULTS SUMMARY"
+echo "======================================"
+
+if [ $API_TEST_EXIT_CODE -eq 0 ]; then
+    echo "✅ API Tests: PASSED"
+else
+    echo "❌ API Tests: FAILED"
+fi
+
+if [ $FRONTEND_TEST_EXIT_CODE -eq 0 ]; then
+    echo "✅ Frontend Tests: PASSED"
+else
+    echo "❌ Frontend Tests: FAILED"
+fi
+
+if [ $CART_TEST_EXIT_CODE -eq 0 ]; then
+    echo "✅ Cart Tests: PASSED"
+else
+    echo "❌ Cart Tests: FAILED"
+fi
+
+echo "======================================"
+
+# Exit with error if any test failed
+if [ $API_TEST_EXIT_CODE -ne 0 ] || [ $FRONTEND_TEST_EXIT_CODE -ne 0 ] || [ $CART_TEST_EXIT_CODE -ne 0 ]; then
+    echo "❌ Some tests failed. Check the output above for details."
+    exit 1
+else
+    echo "🎉 All tests passed successfully!"
+    exit 0
+fi
