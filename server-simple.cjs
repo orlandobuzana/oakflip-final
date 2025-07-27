@@ -15,7 +15,10 @@ let products = [
     id: '1',
     name: 'Premium Wireless Headphones',
     description: 'High-quality sound with noise cancellation and 30-hour battery life',
-    price: 299.99,
+    price: 199.99,
+    originalPrice: 299.99,
+    onSale: true,
+    salePercentage: 33,
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
     images: [
       'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=400&fit=crop',
@@ -58,10 +61,26 @@ let products = [
     id: '3',
     name: 'Laptop Pro',
     description: 'High-performance laptop for professionals',
-    price: 1299.99,
+    price: 999.99,
+    originalPrice: 1299.99,
+    onSale: true,
+    salePercentage: 23,
     image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500',
+    images: [
+      'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=600&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=600&h=400&fit=crop'
+    ],
     category: '1',
-    stock: 5
+    stock: 5,
+    specs: {
+      brand: 'TechBook Pro',
+      processor: 'Intel i7 12th Gen',
+      ram: '16GB DDR4',
+      storage: '512GB SSD',
+      display: '15.6" 4K Retina',
+      warranty: '3 years'
+    }
   },
   {
     id: '4',

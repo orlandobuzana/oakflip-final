@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Dedicated Product Detail Pages & Sale Indicators (January 27, 2025)
+- Created full-screen dedicated product detail pages replacing modal expansion
+- Added prominent sale symbols and badges to products with discounts
+- Made deal cards clickable to redirect directly to product detail page
+- Enhanced deals section with better visual hierarchy and sale indicators
+- Implemented sale price display with original price strikethrough
+- Added fire emoji and percentage savings badges to sale products
+- Improved product detail page with enhanced pricing display for sale items
+- Created professional full-screen layout with sticky navigation header
+
 ### Enhanced Product Cards with Conditional Details Display (January 27, 2025)
 - Implemented conditional product details display - only shown when "Details" button is pressed
 - Enhanced product cards (400px wide) with multiple image galleries and specifications

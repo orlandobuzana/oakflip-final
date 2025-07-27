@@ -713,7 +713,16 @@
                         <img class="main-image" src="${product.image}" alt="${product.name}" 
                              style="width: 100%; height: 250px; object-fit: cover; border-radius: 6px;" 
                              onerror="this.src='https://via.placeholder.com/400x250?text=Product+Image'">
-                        ${product.stock < 5 && product.stock > 0 ? '<div style="position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Low Stock</div>' : ''}
+                        
+                        <!-- Sale Badge -->
+                        ${product.onSale ? `
+                        <div style="position: absolute; top: 8px; left: 8px; background: linear-gradient(45deg, #ef4444, #dc2626); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: bold; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); display: flex; align-items: center; gap: 0.25rem;">
+                            🔥 ${product.salePercentage}% OFF
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Low Stock Badge -->
+                        ${product.stock < 5 && product.stock > 0 ? '<div style="position: absolute; top: 8px; right: 8px; background: #f59e0b; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Low Stock</div>' : ''}
                     </div>
                     
                     <div class="product-content" data-product-id="${product.id}">
@@ -721,7 +730,16 @@
                         <div class="product-description" style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">${product.description}</div>
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <div class="product-price" style="font-size: 1.25rem; font-weight: bold; color: #059669;">$${product.price.toFixed(2)}</div>
+                            <div class="product-price">
+                                ${product.onSale ? `
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 1.25rem; font-weight: bold; color: #ef4444;">$${product.price.toFixed(2)}</span>
+                                    <span style="font-size: 0.9rem; color: #6b7280; text-decoration: line-through;">$${product.originalPrice.toFixed(2)}</span>
+                                </div>
+                                ` : `
+                                <span style="font-size: 1.25rem; font-weight: bold; color: #059669;">$${product.price.toFixed(2)}</span>
+                                `}
+                            </div>
                             <div class="product-stock ${product.stock < 5 ? 'low' : ''}" style="font-size: 0.85rem; color: ${product.stock < 5 ? '#ef4444' : '#059669'}; font-weight: 500;">
                                 ${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                             </div>
@@ -822,7 +840,19 @@
                             <p style="color: #6b7280; font-size: 1.1rem; line-height: 1.6; margin-bottom: 1.5rem;">${product.description}</p>
                             
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                                <div style="font-size: 2.5rem; font-weight: bold; color: #059669;">$${product.price.toFixed(2)}</div>
+                                <div>
+                                    ${product.onSale ? `
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                                        <div style="font-size: 2.5rem; font-weight: bold; color: #ef4444;">$${product.price.toFixed(2)}</div>
+                                        <div style="font-size: 1.5rem; color: #6b7280; text-decoration: line-through;">$${product.originalPrice.toFixed(2)}</div>
+                                    </div>
+                                    <div style="background: #fef2f2; color: #ef4444; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; font-weight: bold; display: inline-block;">
+                                        🔥 Save $${(product.originalPrice - product.price).toFixed(2)} (${product.salePercentage}% OFF)
+                                    </div>
+                                    ` : `
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: #059669;">$${product.price.toFixed(2)}</div>
+                                    `}
+                                </div>
                                 <div style="font-size: 1.1rem; color: ${product.stock < 5 ? '#ef4444' : '#059669'}; font-weight: 600;">
                                     ${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                                 </div>
@@ -1375,32 +1405,60 @@
         function displayDeals() {
             const dealsContainer = document.getElementById('deals-container');
             
-            // Show products with discounts or featured deals
+            // Show products that are on sale or featured deals
             const dealProducts = products.filter(product => 
-                product.category === '1' || product.category === '2' || product.id === '1' || product.id === '3' || product.id === '5'
+                product.onSale || product.category === '1' || product.category === '2' || product.id === '1' || product.id === '3' || product.id === '5'
             ).slice(0, 3);
             
             dealsContainer.innerHTML = dealProducts.map(product => {
-                const discountPercent = Math.floor(Math.random() * 30) + 20; // 20-50% discount
-                const originalPrice = product.price * (1 + discountPercent / 100);
+                const isOnSale = product.onSale;
+                const discountPercent = isOnSale ? product.salePercentage : Math.floor(Math.random() * 30) + 20;
+                const originalPrice = isOnSale ? product.originalPrice : product.price * (1 + discountPercent / 100);
+                const savings = isOnSale ? (product.originalPrice - product.price).toFixed(2) : (originalPrice - product.price).toFixed(2);
                 
                 return `
-                    <div class="product-card" style="border: 2px solid #f59e0b; position: relative;">
-                        <div style="position: absolute; top: 0.5rem; right: 0.5rem; background: #dc2626; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">
-                            -${discountPercent}%
+                    <div class="product-card" onclick="showProductDetailPage('${product.id}')" style="cursor: pointer; border: 2px solid #f59e0b; position: relative; background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px rgba(245, 158, 11, 0.4)'"
+                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        
+                        <!-- Sale Badge -->
+                        <div style="position: absolute; top: -8px; right: -8px; background: linear-gradient(45deg, #ef4444, #dc2626); color: white; padding: 0.5rem; border-radius: 50%; font-size: 0.8rem; font-weight: bold; min-width: 50px; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4); z-index: 10;">
+                            🔥<br>${discountPercent}%<br>OFF
                         </div>
-                        <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=Product+Image'">
-                        <div class="product-content">
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-description">${product.description}</div>
-                            <div class="product-stock ${product.stock < 5 ? 'low' : ''}">${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;">
-                                <div style="text-decoration: line-through; color: #6b7280; font-size: 0.9rem;">$${originalPrice.toFixed(2)}</div>
-                                <div class="product-price" style="color: #dc2626; font-size: 1.2rem; font-weight: bold;">$${product.price.toFixed(2)}</div>
+                        
+                        <img src="${product.image}" alt="${product.name}" class="product-image" 
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: 6px 6px 0 0;"
+                             onerror="this.src='https://via.placeholder.com/300x200?text=Product+Image'">
+                        
+                        <div class="product-content" style="padding: 1rem;">
+                            <div class="product-name" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem; color: #374151;">${product.name}</div>
+                            <div class="product-description" style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">${product.description}</div>
+                            <div class="product-stock ${product.stock < 5 ? 'low' : ''}" style="font-size: 0.85rem; color: ${product.stock < 5 ? '#ef4444' : '#059669'}; font-weight: 600; margin-bottom: 0.75rem;">
+                                ${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                             </div>
-                            <button class="btn" style="background: #f59e0b; border: none;" onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''}>
-                                ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart - DEAL!'}
-                            </button>
+                            
+                            <!-- Pricing with clear savings -->
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                                    <div class="product-price" style="color: #ef4444; font-size: 1.4rem; font-weight: bold;">$${product.price.toFixed(2)}</div>
+                                    <div style="text-decoration: line-through; color: #6b7280; font-size: 1rem;">$${originalPrice.toFixed(2)}</div>
+                                </div>
+                                <div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: bold; display: inline-block;">
+                                    Save $${savings}!
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.5rem;">
+                                <button class="btn" style="background: #f59e0b; border: none; color: white; font-weight: bold;" 
+                                        onclick="event.stopPropagation(); addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''}>
+                                    ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                                </button>
+                                <button style="background: #374151; color: white; border: none; padding: 0.75rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer;" 
+                                        onclick="event.stopPropagation(); showProductDetailPage('${product.id}')">
+                                    Details
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
