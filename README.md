@@ -104,32 +104,182 @@ Visit `http://localhost:5000` to see your store!
 
 ## 🐳 Docker Setup (Recommended for Older Systems)
 
-If you're having compatibility issues with `tsx` on older macOS systems, use Docker:
+If you're having compatibility issues with `tsx` on older macOS systems, use Docker for a consistent environment across all platforms.
 
-### Development with Docker
+### Prerequisites
+1. **Install Docker Desktop**: Download from [docker.com](https://www.docker.com/products/docker-desktop)
+2. **Install Docker Compose**: Usually included with Docker Desktop
+3. **Verify Installation**:
+   ```bash
+   docker --version
+   docker-compose --version
+   ```
+
+### Quick Start with Docker
+
+**Option 1: Development Mode (Recommended)**
 ```bash
-# Start development environment
-docker-compose up dev
+# Clone the repository
+git clone https://github.com/yourusername/rest-express.git
+cd rest-express
 
-# Or run in background
-docker-compose up -d dev
+# Start development environment with hot reloading
+docker-compose up dev
 ```
 
-### Production with Docker
+**Option 2: Production Mode**
+```bash
+# Build and start production environment
+docker-compose up --build app
+```
+
+### Docker Environment Variables
+Create a `.env` file in the project root:
+```env
+# Database (automatically handled by docker-compose)
+DATABASE_URL=mongodb://mongo:27017/rest-express
+
+# Session Management
+SESSION_SECRET=your-super-secret-session-key-here
+
+# Optional: Payment Integration
+STRIPE_SECRET_KEY=sk_test_your_stripe_key
+VITE_STRIPE_PUBLIC_KEY=pk_test_your_stripe_public_key
+```
+
+### Docker Commands Reference
+
+**Development Commands:**
+```bash
+# Start development server with hot reloading
+docker-compose up dev
+
+# Run development in background
+docker-compose up -d dev
+
+# View logs
+docker-compose logs -f dev
+
+# Stop development environment
+docker-compose down
+```
+
+**Production Commands:**
 ```bash
 # Build and start production
 docker-compose up --build app
 
-# Or run individual container
-docker build -t rest-express .
-docker run -p 5000:5000 --env-file .env rest-express
+# Run production in background
+docker-compose up -d app
+
+# Rebuild containers
+docker-compose build --no-cache
+
+# Stop all services
+docker-compose down
 ```
 
-### Docker Benefits
-- Consistent environment across all systems
-- No compatibility issues with tsx or Node.js versions
-- Includes MongoDB container for easy database setup
-- Hot reloading in development mode
+**Database Commands:**
+```bash
+# Start only MongoDB
+docker-compose up -d mongo
+
+# Access MongoDB shell
+docker-compose exec mongo mongosh rest-express
+
+# View database logs
+docker-compose logs mongo
+```
+
+**Maintenance Commands:**
+```bash
+# Remove all containers and volumes
+docker-compose down -v
+
+# Clean up Docker system
+docker system prune -a
+
+# View running containers
+docker ps
+
+# View all containers
+docker ps -a
+```
+
+### Docker Troubleshooting
+
+**Common Issues and Solutions:**
+
+1. **Port Already in Use**
+   ```bash
+   # Kill process using port 5000
+   lsof -ti:5000 | xargs kill -9
+   
+   # Or change port in docker-compose.yml
+   ports:
+     - "3000:5000"  # Use port 3000 instead
+   ```
+
+2. **Container Build Failures**
+   ```bash
+   # Clean build cache
+   docker-compose build --no-cache
+   
+   # Remove all containers and rebuild
+   docker-compose down
+   docker system prune -f
+   docker-compose up --build dev
+   ```
+
+3. **Database Connection Issues**
+   ```bash
+   # Restart MongoDB container
+   docker-compose restart mongo
+   
+   # Check MongoDB status
+   docker-compose exec mongo mongosh --eval "db.adminCommand('ismaster')"
+   ```
+
+4. **Permission Issues (macOS/Linux)**
+   ```bash
+   # Fix ownership of node_modules
+   sudo chown -R $(whoami) node_modules
+   ```
+
+5. **Memory Issues on Older Systems**
+   ```bash
+   # Increase Docker memory limit in Docker Desktop preferences
+   # Recommended: 4GB RAM, 2GB Swap
+   ```
+
+### Docker Benefits for Older Systems
+- **No Node.js Version Conflicts**: Uses Node.js 20 LTS in container
+- **No tsx Compatibility Issues**: All TypeScript execution happens in container
+- **Consistent MongoDB**: Same database version across all environments
+- **Hot Reloading**: Development mode still provides live updates
+- **Easy Cleanup**: Remove everything with `docker-compose down -v`
+
+### Performance Tips
+- **Development**: Use `docker-compose up dev` for hot reloading
+- **Production Testing**: Use `docker-compose up app` to test production build
+- **Memory Usage**: Close unused Docker containers to free memory
+- **Fast Rebuilds**: Only rebuild when package.json changes
+
+### Accessing Your Application
+- **Development**: http://localhost:5000
+- **Admin Panel**: http://localhost:5000/admin
+- **API Documentation**: All endpoints available at `/api/*`
+
+### Docker vs Native Development
+
+| Feature | Native | Docker |
+|---------|--------|--------|
+| Setup Time | Fast | Medium |
+| Compatibility | System-dependent | Universal |
+| Memory Usage | Lower | Higher |
+| Hot Reloading | ✅ | ✅ |
+| Database Setup | Manual | Automatic |
+| tsx Issues | Possible | None |
 
 ## 🎨 Customization Guide
 
