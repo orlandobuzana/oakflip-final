@@ -21,8 +21,13 @@ fi
 
 npm install express --save
 
-echo "🚀 Starting simple server..."
+echo "🚀 Starting simple server with frontend..."
 echo "This will run without TypeScript compilation"
+echo ""
+echo "The application will be available at:"
+echo "  🌐 Frontend: http://localhost:5000"
+echo "  🔌 API: http://localhost:5000/api/products"
+echo ""
 
 # Start the simple server
 node server-simple.js

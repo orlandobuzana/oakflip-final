@@ -76,29 +76,23 @@ app.get('/api/dashboard/stats', (req, res) => {
   });
 });
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'dist/public')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist/public/index.html'));
-  });
-} else {
-  // Development - simple response
-  app.get('/', (req, res) => {
-    res.send(`
-      <h1>Rest Express E-commerce</h1>
-      <p>Simple JavaScript server running successfully!</p>
-      <p>API endpoints available:</p>
-      <ul>
-        <li><a href="/api/products">/api/products</a></li>
-        <li><a href="/api/categories">/api/categories</a></li>
-        <li><a href="/api/dashboard/stats">/api/dashboard/stats</a></li>
-      </ul>
-      <p>For full frontend, run: npm run build-simple</p>
-    `);
-  });
-}
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve the main HTML file
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Catch-all route for SPA
+app.get('*', (req, res) => {
+  // Don't interfere with API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ message: 'API endpoint not found' });
+  }
+  // Serve index.html for all other routes
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Error handling
 app.use((err, req, res, next) => {
