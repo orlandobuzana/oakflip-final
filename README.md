@@ -611,6 +611,6 @@ rest-express/
 
 ---
 
-**Made with ❤️ for modern e-commerce**
+**Made with ❤️ for Oakflip  and opensource Belivers **
 
 Ready to build something amazing? Star this repo and let's grow together!
