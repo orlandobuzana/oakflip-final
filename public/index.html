@@ -277,24 +277,7 @@
         </div>
     </section>
 
-    <!-- Deals Widget -->
-    <section class="deals-section" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 1rem 0; margin-bottom: 2rem; cursor: pointer;" onclick="scrollToDeals()">
-        <div class="container">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-                <div>
-                    <h3 style="margin: 0; font-size: 1.2rem; margin-bottom: 0.25rem;">🔥 Limited Time Offers</h3>
-                    <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Up to 50% off • Free shipping over $50</p>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 1.2rem; font-weight: bold; color: white;">Limited Time!</div>
-                    <div style="font-size: 0.8rem; opacity: 0.8;">Check admin for details</div>
-                </div>
-                <div style="background: white; color: #d97706; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; font-weight: bold;">
-                    Click to Shop →
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Special Deals Products -->
     <section id="deals-products" style="margin-bottom: 2rem;">
@@ -365,6 +348,16 @@
                 Total: $<span id="modal-cart-total">0.00</span>
             </div>
             <button class="btn" onclick="checkout()" id="checkout-btn">Checkout</button>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div id="product-detail-modal" class="cart-modal">
+        <div class="cart-content" style="max-width: 800px;">
+            <button class="close-btn" onclick="closeProductDetail()">&times;</button>
+            <div id="product-detail-content">
+                <!-- Product detail content will be loaded here -->
+            </div>
         </div>
     </div>
 
@@ -521,8 +514,8 @@
                         <button class="btn" onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''}>
                             ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                         </button>
-                        <button class="btn" style="background: #6b7280; margin-left: 0.5rem;" onclick="showProductReviews('${product.id}')">
-                            Reviews
+                        <button class="btn" style="background: #374151; margin-top: 0.5rem; width: 100%;" onclick="showProductDetail('${product.id}')">
+                            View Details
                         </button>
                     </div>
                 </div>
@@ -1012,6 +1005,77 @@
         function closeProductReviews() {
             document.getElementById('product-reviews-modal').style.display = 'none';
             resetReviewForm();
+        }
+
+        // Product detail page functionality
+        function showProductDetail(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const detailContent = document.getElementById('product-detail-content');
+            detailContent.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div>
+                        <img src="${product.image}" alt="${product.name}" style="width: 100%; border-radius: 8px;" onerror="this.src='https://via.placeholder.com/400x300?text=Product+Image'">
+                    </div>
+                    <div>
+                        <h2 style="margin-bottom: 1rem; color: #374151;">${product.name}</h2>
+                        <p style="color: #6b7280; margin-bottom: 1rem; line-height: 1.6;">${product.description}</p>
+                        <div style="margin-bottom: 1rem;">
+                            <span style="font-size: 2rem; font-weight: bold; color: #059669;">$${product.price.toFixed(2)}</span>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <span class="product-stock ${product.stock < 5 ? 'low' : ''}">${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</span>
+                        </div>
+                        <div style="margin-bottom: 2rem;">
+                            <div class="review-stars">${getProductRatingStars(product.id)}</div>
+                            <span style="color: #6b7280;">${getProductReviewCount(product.id)} reviews</span>
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn" onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''} style="flex: 1;">
+                                ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="margin: 0; color: #374151;">Customer Reviews</h3>
+                        <button class="btn" onclick="showProductReviews('${product.id}')" style="background: #6b7280;">
+                            Write a Review
+                        </button>
+                    </div>
+                    <div id="product-detail-reviews">
+                        ${getProductDetailReviews(product.id)}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('product-detail-modal').style.display = 'block';
+        }
+
+        function closeProductDetail() {
+            document.getElementById('product-detail-modal').style.display = 'none';
+        }
+
+        function getProductDetailReviews(productId) {
+            const approvedReviews = productReviews.filter(r => r.productId === productId && r.approved);
+            
+            if (approvedReviews.length === 0) {
+                return '<p style="text-align: center; color: #6b7280; padding: 2rem;">No reviews yet. Be the first to review this product!</p>';
+            }
+
+            return approvedReviews.map(review => `
+                <div style="border-bottom: 1px solid #f3f4f6; padding: 1.5rem 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <strong style="color: #374151;">${review.name}</strong>
+                        <div style="color: #f59e0b;">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</div>
+                    </div>
+                    <p style="color: #6b7280; margin: 0; line-height: 1.6;">${review.comment}</p>
+                    <small style="color: #9ca3af;">${new Date(review.createdAt).toLocaleDateString()}</small>
+                </div>
+            `).join('');
         }
 
         function setReviewRating(rating) {
