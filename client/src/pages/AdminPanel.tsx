@@ -19,6 +19,8 @@ import SalesChart from "@/components/SalesChart";
 import TopProducts from "@/components/TopProducts";
 import UserManagement from "@/components/UserManagement";
 import DealsManagement from "@/components/DealsManagement";
+import ProductManagement from "@/components/ProductManagement";
+import CategoryManagement from "@/components/CategoryManagement";
 import UserMenu from "@/components/UserMenu";
 
 import { 
@@ -218,7 +220,7 @@ export default function AdminPanel() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="dashboard" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <Home className="h-4 w-4" />
               Dashboard
@@ -226,6 +228,10 @@ export default function AdminPanel() {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Categories
             </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
@@ -236,7 +242,7 @@ export default function AdminPanel() {
               Orders
             </TabsTrigger>
             <TabsTrigger value="deals" className="flex items-center gap-2">
-              <Tag className="h-4 w-4" />
+              <AlertTriangle className="h-4 w-4" />
               Deals
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
@@ -390,8 +396,18 @@ export default function AdminPanel() {
             </div>
           </TabsContent>
 
+          {/* Categories Tab */}
+          <TabsContent value="categories">
+            <CategoryManagement />
+          </TabsContent>
+
           {/* Products Tab */}
           <TabsContent value="products">
+            <ProductManagement />
+          </TabsContent>
+
+          {/* Legacy Products Tab - Remove after testing */}
+          <TabsContent value="legacy-products">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Product Management</CardTitle>
