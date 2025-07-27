@@ -196,9 +196,15 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">Rest Express</div>
-                <div class="cart-info" onclick="toggleCart()">
-                    Cart (<span id="cart-count">0</span>) - $<span id="cart-total">0.00</span>
-                </div>
+                <nav style="display: flex; align-items: center; gap: 1rem;">
+                    <select id="category-filter" onchange="filterByCategory()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="">All Categories</option>
+                    </select>
+                    <a href="/admin" style="color: #2563eb; text-decoration: none; padding: 0.5rem 1rem; border: 1px solid #2563eb; border-radius: 4px;">Admin</a>
+                    <div class="cart-info" onclick="toggleCart()">
+                        Cart (<span id="cart-count">0</span>) - $<span id="cart-total">0.00</span>
+                    </div>
+                </nav>
             </div>
         </div>
     </header>
@@ -239,6 +245,7 @@
                 if (!response.ok) throw new Error('Failed to load products');
                 
                 products = await response.json();
+                await loadCategories();
                 displayProducts();
                 hideLoading();
             } catch (error) {
@@ -247,10 +254,31 @@
             }
         }
 
-        function displayProducts() {
+        async function loadCategories() {
+            try {
+                const response = await fetch('/api/categories');
+                const categories = await response.json();
+                
+                const categorySelect = document.getElementById('category-filter');
+                categorySelect.innerHTML = '<option value="">All Categories</option>' + 
+                    categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+            } catch (error) {
+                console.error('Failed to load categories:', error);
+            }
+        }
+
+        function filterByCategory() {
+            const selectedCategory = document.getElementById('category-filter').value;
+            const filteredProducts = selectedCategory ? 
+                products.filter(p => p.category === selectedCategory) : 
+                products;
+            displayProducts(filteredProducts);
+        }
+
+        function displayProducts(productsToShow = products) {
             const container = document.getElementById('products-container');
             
-            container.innerHTML = products.map(product => `
+            container.innerHTML = productsToShow.map(product => `
                 <div class="product-card">
                     <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=Product+Image'">
                     <div class="product-name">${product.name}</div>
