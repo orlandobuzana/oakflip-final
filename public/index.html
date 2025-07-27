@@ -253,27 +253,29 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; padding: 3rem 0; text-align: center;">
         <div class="container">
-            <h1>Welcome to Rest Express</h1>
-            <p>Discover amazing products at unbeatable prices</p>
-            <button class="btn" onclick="document.getElementById('products-container').scrollIntoView({behavior: 'smooth'})">Shop Now</button>
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Welcome to Rest Express</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9;">Discover amazing products at unbeatable prices</p>
+            <button class="btn" style="background: white; color: #2563eb; padding: 0.75rem 2rem; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;" onclick="document.getElementById('products-container').scrollIntoView({behavior: 'smooth'})">Shop Now</button>
         </div>
     </section>
 
     <!-- Deals Widget -->
-    <section class="deals-section" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 2rem 0; margin-bottom: 2rem;">
+    <section class="deals-section" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 1rem 0; margin-bottom: 2rem; cursor: pointer;" onclick="scrollToDeals()">
         <div class="container">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <h2 style="margin: 0; font-size: 1.5rem; margin-bottom: 0.5rem;">🔥 Limited Time Offers</h2>
-                    <p style="margin: 0; opacity: 0.9;">Up to 50% off on selected items • Free shipping on orders over $50</p>
+                    <h3 style="margin: 0; font-size: 1.2rem; margin-bottom: 0.25rem;">🔥 Limited Time Offers</h3>
+                    <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Up to 50% off • Free shipping over $50</p>
                 </div>
                 <div style="text-align: center;">
-                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;" id="countdown">24:00:00</div>
-                    <div style="font-size: 0.9rem; opacity: 0.8;">Time remaining</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.25rem;" id="countdown">24:00:00</div>
+                    <div style="font-size: 0.8rem; opacity: 0.8;">Time remaining</div>
                 </div>
-                <button class="btn" style="background: white; color: #d97706; border: none; font-weight: bold;" onclick="scrollToDeals()">Shop Deals</button>
+                <div style="background: white; color: #d97706; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; font-weight: bold;">
+                    Click to Shop →
+                </div>
             </div>
         </div>
     </section>
@@ -377,8 +379,6 @@
                 <button type="submit" class="btn">Login</button>
             </form>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-                Demo admin: admin@store.com / admin123<br>
-                Demo customer: customer@email.com / password123<br>
                 <a href="#" onclick="showSignup(); closeLogin();" style="color: #2563eb;">Don't have an account? Sign up</a>
             </p>
         </div>
@@ -437,6 +437,10 @@
                         <div class="product-description">${product.description}</div>
                         <div class="product-stock ${product.stock < 5 ? 'low' : ''}">${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</div>
                         <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; margin: 0.5rem 0;">
+                            <input type="file" id="photo-${product.id}" accept="image/*" style="display: none;" onchange="uploadProductPhoto('${product.id}', this)">
+                            <button onclick="document.getElementById('photo-${product.id}').click()" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">📷 Upload</button>
+                        </div>
                         <button class="btn" onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''}>
                             ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                         </button>
@@ -780,6 +784,36 @@
 
         function scrollToDeals() {
             document.getElementById('products-container').scrollIntoView({behavior: 'smooth'});
+        }
+
+        // Photo upload function
+        function uploadProductPhoto(productId, fileInput) {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                showError('Please select an image file');
+                return;
+            }
+
+            // Check file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showError('Image size must be less than 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Update the product image in memory
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    product.image = e.target.result;
+                    displayProducts(); // Refresh the display
+                    showSuccess('Photo uploaded successfully!');
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
         // Form handlers
