@@ -104,7 +104,32 @@ Visit `http://localhost:5000` to see your store!
 
 ## 🔧 Alternative Setup Methods for Older Systems
 
-### Method 1: Node Version Manager (Recommended for Older macOS)
+### Method 0: Ultra-Simple Version (For macOS Big Sur and Older)
+
+If nothing else works, use the ultra-simple JavaScript-only version:
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/rest-express.git
+cd rest-express
+
+# Run the simple setup
+chmod +x start-simple.sh
+./start-simple.sh
+```
+
+**What this does:**
+- Uses only plain JavaScript (no TypeScript)
+- Requires only Express.js (no complex dependencies)
+- Works with Node.js 12+ (compatible with Big Sur)
+- No build step needed
+- API-only version that proves the concept works
+
+**To test it's working:**
+- Visit: http://localhost:5000
+- API endpoints: http://localhost:5000/api/products
+
+### Method 1: Node Version Manager (Recommended for Newer macOS)
 
 If Docker isn't compatible with your older macOS, use Node Version Manager:
 
@@ -343,19 +368,20 @@ docker ps -a
 
 ### Method Comparison for Older macOS
 
-| Feature | nvm + Node 18 | ts-node | Pre-compiled JS | Docker |
-|---------|-------------|---------|----------------|--------|
-| macOS Compatibility | ✅ High | ✅ High | ✅ Highest | ❌ Limited |
+| Feature | Simple JS | nvm + Node 18 | ts-node | Pre-compiled JS | Docker |
+|---------|-----------|-------------|---------|----------------|--------|
+| Big Sur Compatibility | ✅ Highest | ✅ High | ✅ High | ✅ Highest | ❌ Limited |
 | Setup Complexity | Low | Low | Medium | High |
 | Memory Usage | Low | Low | Lowest | High |
 | Hot Reloading | ✅ | ✅ | ❌ | ✅ |
 | TypeScript Support | ✅ | ✅ | Build-time only | ✅ |
 
-### Recommended Approach for Older macOS:
-1. **First try**: nvm with Node.js 18
-2. **If tsx still fails**: Switch to ts-node
-3. **For production**: Use pre-compiled JavaScript
-4. **Last resort**: Docker (if your macOS version supports it)
+### Recommended Approach for macOS Big Sur and Older:
+1. **Start here**: Ultra-simple JavaScript version (no TypeScript)
+2. **If that works**: Try nvm with Node.js 16-18
+3. **If tsx still fails**: Switch to ts-node
+4. **For production**: Use pre-compiled JavaScript
+5. **Last resort**: Docker (usually not compatible with older macOS)
 
 ## 🎨 Customization Guide
 
