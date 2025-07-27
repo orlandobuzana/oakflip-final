@@ -1,4 +1,4 @@
-# Rest Express - Full-Stack E-Commerce Platform
+# Oakflip-Final - Full-Stack E-Commerce Platform
 
 A modern, feature-rich e-commerce application built with React, Express.js, and MongoDB. Features multi-language support, user analytics, dynamic shipping calculations, and a complete admin panel.
 
@@ -584,7 +584,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Documentation**: Check this README and code comments
 - **Issues**: Open a GitHub issue for bugs or feature requests  
-- **Repository**: https://github.com/yourusername/rest-express
+- **Repository**: https://github.com/orlandobuzana/oakflip-final
 - **Discussions**: Use GitHub Discussions for questions
 
 ## 🏗 Architecture
