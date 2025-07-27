@@ -14,20 +14,45 @@ let products = [
   {
     id: '1',
     name: 'Premium Wireless Headphones',
-    description: 'High-quality sound with noise cancellation',
+    description: 'High-quality sound with noise cancellation and 30-hour battery life',
     price: 299.99,
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
+    images: [
+      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?w=600&h=400&fit=crop'
+    ],
     category: '1',
-    stock: 15
+    stock: 15,
+    specs: {
+      brand: 'AudioTech Pro',
+      connectivity: 'Bluetooth 5.0, USB-C',
+      battery: '30 hours playback',
+      weight: '250g',
+      warranty: '2 years'
+    }
   },
   {
     id: '2',
     name: 'Smart Watch',
-    description: 'Track your fitness and stay connected',
+    description: 'Track your fitness and stay connected with advanced health monitoring',
     price: 399.99,
     image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
+    images: [
+      'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=600&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=400&fit=crop'
+    ],
     category: '1',
-    stock: 8
+    stock: 8,
+    specs: {
+      brand: 'TechFit Pro',
+      display: 'AMOLED Retina',
+      battery: '7 days',
+      waterproof: 'IP68',
+      warranty: '1 year'
+    }
   },
   {
     id: '3',
