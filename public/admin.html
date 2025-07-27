@@ -204,8 +204,8 @@
             background: white;
             padding: 2rem;
             border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
+            max-width: 800px;
+            width: 95%;
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -446,21 +446,33 @@
             <button class="close-btn" onclick="closeModal('add-product-modal')">&times;</button>
             <h2>Add New Product</h2>
             <form id="add-product-form">
-                <div class="form-group">
-                    <label class="form-label">Product Name</label>
-                    <input type="text" name="name" class="form-input" required>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-input" id="product-category-select" required>
+                            <!-- Categories will be loaded here -->
+                        </select>
+                    </div>
                 </div>
+                
                 <div class="form-group">
                     <label class="form-label">Description</label>
-                    <textarea name="description" class="form-textarea" required></textarea>
+                    <textarea name="description" class="form-textarea" required style="min-height: 120px; resize: vertical;"></textarea>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Price</label>
-                    <input type="number" name="price" class="form-input" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Stock</label>
-                    <input type="number" name="stock" class="form-input" required>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">Price ($)</label>
+                        <input type="number" name="price" class="form-input" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stock Quantity</label>
+                        <input type="number" name="stock" class="form-input" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Product Image</label>
@@ -468,12 +480,7 @@
                     <small style="color: #6b7280;">Or provide URL below:</small>
                     <input type="url" name="image" id="image-url-input" class="form-input" placeholder="https://example.com/image.jpg" style="margin-top: 0.5rem;">
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Category</label>
-                    <select name="category" class="form-input" id="product-category-select" required>
-                        <!-- Categories will be loaded here -->
-                    </select>
-                </div>
+
                 <button type="submit" class="btn">Add Product</button>
             </form>
         </div>

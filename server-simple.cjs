@@ -461,12 +461,38 @@ app.get('/api/reviews/:productId', (req, res) => {
 });
 
 app.post('/api/reviews', (req, res) => {
+  const { productId, name, rating, comment, customerEmail } = req.body;
+  
+  // Check if customer has purchased this product
+  const hasPurchased = orders.some(order => 
+    order.customerEmail === customerEmail && 
+    order.items.some(item => item.productId === productId)
+  );
+  
+  if (!hasPurchased) {
+    return res.status(403).json({ message: 'You can only review products you have purchased' });
+  }
+  
+  // Check if customer already reviewed this product
+  const hasReviewed = reviews.some(r => 
+    r.productId === productId && r.customerEmail === customerEmail
+  );
+  
+  if (hasReviewed) {
+    return res.status(409).json({ message: 'You have already reviewed this product' });
+  }
+
   const review = {
     id: Date.now().toString(),
-    ...req.body,
+    productId,
+    name,
+    rating: parseInt(rating),
+    comment,
+    customerEmail,
     createdAt: new Date(),
     approved: false
   };
+  
   reviews.push(review);
   res.status(201).json(review);
 });

@@ -10,6 +10,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Purchase History & Review Restrictions (January 27, 2025)
+- Implemented purchase history tracking system for customers
+- Restricted reviews to customers who have actually purchased the product
+- Removed general review form from main page (comments section eliminated)
+- Reviews now only accessible through individual product detail pages
+- Added purchase verification before allowing review submission
+- Customers must buy product first before being allowed to write reviews
+- One review per customer per product policy enforced
+- Server-side validation checks purchase history before accepting reviews
+- Purchase history stored and tracked with customer email
+- Enhanced security preventing fake reviews from non-customers
+
 ### Customer Review System & Image Upload Improvements (January 27, 2025)
 - Removed image upload functionality from customer-facing product cards
 - Moved photo upload feature to admin-only "Add New Product" form with file picker and URL input
