@@ -92,7 +92,15 @@ npm run db:push
 npm run dev
 ```
 
+**Important:** Use `npm run dev` (NOT `npm start dev`)
+
 Visit `http://localhost:5000` to see your store!
+
+### Available Commands
+- `npm run dev` - Start development server with hot reloading
+- `npm start` - Run production server (requires `npm run build` first)
+- `npm run build` - Build project for production
+- `npm run check` - Run TypeScript type checking
 
 ## 🎨 Customization Guide
 
