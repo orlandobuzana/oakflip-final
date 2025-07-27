@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { CartItem } from '@shared/schema';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -19,6 +20,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { trackCartEvent } = useAnalytics();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -41,17 +43,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCartItems(prev => {
       const existingItem = prev.find(cartItem => cartItem.id === item.id);
       if (existingItem) {
+        // Track update event
+        trackCartEvent('update', item.id.toString(), existingItem.quantity + 1, parseFloat(item.price));
         return prev.map(cartItem =>
           cartItem.id === item.id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem
         );
       }
+      // Track add event
+      trackCartEvent('add', item.id.toString(), 1, parseFloat(item.price));
       return [...prev, { ...item, quantity: 1 }];
     });
   };
 
   const removeFromCart = (id: number) => {
+    // Track remove event
+    trackCartEvent('remove', id.toString());
     setCartItems(prev => prev.filter(item => item.id !== id));
   };
 
@@ -60,6 +68,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeFromCart(id);
       return;
     }
+    
+    // Track update event
+    const item = cartItems.find(item => item.id === id);
+    if (item) {
+      trackCartEvent('update', id.toString(), quantity, parseFloat(item.price) * quantity);
+    }
+    
     setCartItems(prev =>
       prev.map(item =>
         item.id === id ? { ...item, quantity } : item
@@ -68,6 +83,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const clearCart = () => {
+    // Track clear event
+    trackCartEvent('clear');
     setCartItems([]);
   };
 

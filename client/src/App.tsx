@@ -6,7 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./contexts/CartContext";
 import { ProductProvider } from "./contexts/ProductContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import Header from "./components/Header";
+import { LanguageSelector } from "./components/LanguageSelector";
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
 import AdminPanel from "./pages/AdminPanel";
@@ -34,21 +36,28 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <CartProvider>
-            <ProductProvider>
-              <div className="min-h-screen bg-slate-50">
-                <Header />
-                <main className="flex-1">
-                  <Router />
-                </main>
-                <ShoppingCart />
-                <ProductModal />
-                <Toaster />
-              </div>
-            </ProductProvider>
-          </CartProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <CartProvider>
+              <ProductProvider>
+                <div className="min-h-screen bg-slate-50">
+                  {/* Language selector in top-right corner */}
+                  <div className="fixed top-4 right-4 z-50">
+                    <LanguageSelector />
+                  </div>
+                  
+                  <Header />
+                  <main className="flex-1">
+                    <Router />
+                  </main>
+                  <ShoppingCart />
+                  <ProductModal />
+                  <Toaster />
+                </div>
+              </ProductProvider>
+            </CartProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

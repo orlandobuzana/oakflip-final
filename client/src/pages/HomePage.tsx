@@ -4,10 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import ProductCard from "@/components/ProductCard";
 import { useLocation } from "wouter";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import type { Category, Product } from "@shared/schema";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
+  const { t } = useLanguage();
+  usePageAnalytics();
 
   const { data: categories, isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
@@ -37,7 +41,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Discover Amazing Products
+              {t('home.hero.title') || 'Discover Amazing Products'}
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100">
               Shop the latest trends with confidence and style

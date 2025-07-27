@@ -1,6 +1,17 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { 
+  createUserSession, 
+  trackPageView, 
+  trackCartEvent, 
+  trackConversion, 
+  getUserSession,
+  getAnalyticsSummary,
+  getDailyStats,
+  getCountryFromIP,
+  getLanguageFromCountry 
+} from "./analytics";
 import { insertProductSchema, insertOrderSchema, insertOrderItemSchema, insertUserSchema, insertDealSchema } from "@shared/schema";
 import { z } from "zod";
 
@@ -362,6 +373,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       res.status(500).json({ message: "Failed to delete deal" });
     }
+  });
+
+  // Analytics tracking routes
+  app.post('/api/analytics/session', (req, res) => {
+    const sessionId = req.body.sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const ipAddress = req.ip || req.connection.remoteAddress || '127.0.0.1';
+    const userAgent = req.get('User-Agent') || '';
+    
+    const session = createUserSession(sessionId, ipAddress, userAgent);
+    res.json({ sessionId, language: session.language, country: session.country });
+  });
+
+  app.post('/api/analytics/page-view', (req, res) => {
+    const { sessionId, path, referrer } = req.body;
+    trackPageView(sessionId, path, referrer);
+    res.json({ success: true });
+  });
+
+  app.post('/api/analytics/cart-event', (req, res) => {
+    const { sessionId, type, productId, quantity, value } = req.body;
+    trackCartEvent(sessionId, type, productId, quantity, value);
+    res.json({ success: true });
+  });
+
+  app.post('/api/analytics/conversion', (req, res) => {
+    const { sessionId, type, orderId, value } = req.body;
+    trackConversion(sessionId, type, orderId, value);
+    res.json({ success: true });
+  });
+
+  app.get('/api/analytics/summary', (req, res) => {
+    const days = parseInt(req.query.days as string) || 7;
+    const summary = getAnalyticsSummary(days);
+    res.json(summary);
+  });
+
+  app.get('/api/analytics/daily/:date', (req, res) => {
+    const stats = getDailyStats(req.params.date);
+    res.json(stats || {});
+  });
+
+  // User language preference routes
+  app.get('/api/user/language-preference', (req, res) => {
+    const ipAddress = req.ip || req.connection.remoteAddress || '127.0.0.1';
+    const country = getCountryFromIP(ipAddress);
+    const language = getLanguageFromCountry(country);
+    
+    res.json({ language, country });
+  });
+
+  app.post('/api/user/language-preference', (req, res) => {
+    const { language } = req.body;
+    // In a real app, save to user profile or session
+    res.json({ success: true, language });
   });
 
   const httpServer = createServer(app);
