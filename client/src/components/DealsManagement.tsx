@@ -27,7 +27,10 @@ export default function DealsManagement() {
     isActive: true,
     minOrderAmount: 0,
     maxUses: null,
-    currentUses: 0
+    currentUses: 0,
+    applicableProducts: [],
+    excludedProducts: [],
+    applyToAll: true,
   });
 
   const { toast } = useToast();
@@ -120,7 +123,10 @@ export default function DealsManagement() {
       isActive: true,
       minOrderAmount: 0,
       maxUses: null,
-      currentUses: 0
+      currentUses: 0,
+      applicableProducts: [],
+      excludedProducts: [],
+      applyToAll: true,
     });
   };
 
@@ -321,6 +327,98 @@ export default function DealsManagement() {
                     />
                   </div>
                 </div>
+
+                {/* Product Selection Section */}
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="applyToAll"
+                      checked={newDeal.applyToAll}
+                      onCheckedChange={(checked) => 
+                        setNewDeal({ 
+                          ...newDeal, 
+                          applyToAll: checked as boolean,
+                          applicableProducts: checked ? [] : newDeal.applicableProducts,
+                          excludedProducts: checked ? [] : newDeal.excludedProducts
+                        })
+                      }
+                    />
+                    <Label htmlFor="applyToAll" className="text-sm font-medium">
+                      Apply to all products
+                    </Label>
+                  </div>
+
+                  {!newDeal.applyToAll && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        Select Specific Products
+                      </Label>
+                      <div className="max-h-32 overflow-y-auto border rounded p-2 space-y-2">
+                        {products?.map((product) => (
+                          <div key={product._id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`product-${product._id}`}
+                              checked={newDeal.applicableProducts.includes(product._id!)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setNewDeal({
+                                    ...newDeal,
+                                    applicableProducts: [...newDeal.applicableProducts, product._id!]
+                                  });
+                                } else {
+                                  setNewDeal({
+                                    ...newDeal,
+                                    applicableProducts: newDeal.applicableProducts.filter(id => id !== product._id)
+                                  });
+                                }
+                              }}
+                            />
+                            <Label htmlFor={`product-${product._id}`} className="text-sm">
+                              {product.name} - ${product.price}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {newDeal.applyToAll && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        Exclude Products (Optional)
+                      </Label>
+                      <div className="max-h-32 overflow-y-auto border rounded p-2 space-y-2">
+                        {products?.map((product) => (
+                          <div key={product._id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`exclude-${product._id}`}
+                              checked={newDeal.excludedProducts.includes(product._id!)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setNewDeal({
+                                    ...newDeal,
+                                    excludedProducts: [...newDeal.excludedProducts, product._id!]
+                                  });
+                                } else {
+                                  setNewDeal({
+                                    ...newDeal,
+                                    excludedProducts: newDeal.excludedProducts.filter(id => id !== product._id)
+                                  });
+                                }
+                              }}
+                            />
+                            <Label htmlFor={`exclude-${product._id}`} className="text-sm">
+                              {product.name} - ${product.price}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex justify-end gap-2">
                   <Button
                     type="button"

@@ -70,11 +70,13 @@ export class MemStorage implements IStorage {
   private orders: Map<string, Order>;
   private orderItems: Map<string, OrderItem>;
   private users: Map<string, User>;
+  private deals: Map<string, Deal>;
   private currentCategoryId: number;
   private currentProductId: number;
   private currentOrderId: number;
   private currentOrderItemId: number;
   private currentUserId: number;
+  private currentDealId: number;
 
   constructor() {
     this.categories = new Map();
@@ -82,11 +84,13 @@ export class MemStorage implements IStorage {
     this.orders = new Map();
     this.orderItems = new Map();
     this.users = new Map();
+    this.deals = new Map();
     this.currentCategoryId = 1;
     this.currentProductId = 1;
     this.currentOrderId = 1;
     this.currentOrderItemId = 1;
     this.currentUserId = 1;
+    this.currentDealId = 1;
 
     this.initializeData();
   }
@@ -464,7 +468,7 @@ export class MemStorage implements IStorage {
     });
 
     const topProducts: TopProduct[] = [];
-    for (const [productId, data] of productSales.entries()) {
+    for (const [productId, data] of [...productSales.entries()]) {
       const product = this.products.get(productId);
       if (product) {
         topProducts.push({
@@ -530,8 +534,6 @@ export class MemStorage implements IStorage {
   }
 
   // Deal Management Methods
-  private deals = new Map<string, Deal>();
-  private currentDealId = 1;
 
   async getDeals(): Promise<Deal[]> {
     return Array.from(this.deals.values());

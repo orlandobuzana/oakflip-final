@@ -10,6 +10,8 @@ import Header from "./components/Header";
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
 import AdminPanel from "./pages/AdminPanel";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrderConfirmation from "./pages/OrderConfirmation";
 import ShoppingCart from "./components/ShoppingCart";
 import ProductModal from "./components/ProductModal";
 
@@ -20,6 +22,8 @@ function Router() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/products" component={ProductsPage} />
+      <Route path="/checkout" component={CheckoutPage} />
+      <Route path="/order-confirmation/:id" component={OrderConfirmation} />
       <Route path="/admin" component={AdminPanel} />
       <Route component={NotFound} />
     </Switch>

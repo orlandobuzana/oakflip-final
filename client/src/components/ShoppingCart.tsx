@@ -3,8 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/contexts/CartContext";
 import { X, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
-import { useState } from "react";
-import CheckoutModal from "./CheckoutModal";
+import { useLocation } from "wouter";
 
 export default function ShoppingCart() {
   const { 
@@ -16,11 +15,11 @@ export default function ShoppingCart() {
     cartTotal 
   } = useCart();
   
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const handleCheckout = () => {
     closeCart();
-    setIsCheckoutOpen(true);
+    setLocation("/checkout");
   };
 
   const formatPrice = (price: string | number) => {
@@ -154,10 +153,7 @@ export default function ShoppingCart() {
         </div>
       </div>
 
-      <CheckoutModal 
-        isOpen={isCheckoutOpen} 
-        onClose={() => setIsCheckoutOpen(false)} 
-      />
+
     </>
   );
 }

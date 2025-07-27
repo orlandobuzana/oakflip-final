@@ -139,6 +139,9 @@ const dealSchema = z.object({
   minOrderAmount: z.number().min(0).default(0),
   maxUses: z.number().nullable().optional(),
   currentUses: z.number().default(0),
+  applicableProducts: z.array(z.string()).default([]), // Product IDs to include
+  excludedProducts: z.array(z.string()).default([]), // Product IDs to exclude
+  applyToAll: z.boolean().default(true), // If true, applies to all products except excluded
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
