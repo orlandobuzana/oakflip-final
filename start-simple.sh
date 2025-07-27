@@ -24,10 +24,18 @@ npm install express --save
 echo "🚀 Starting simple server with frontend..."
 echo "This will run without TypeScript compilation"
 echo ""
+
+# Kill any existing Node processes on port 5000
+echo "🔄 Stopping any existing servers..."
+pkill -f "tsx server" 2>/dev/null || true
+pkill -f "node server" 2>/dev/null || true
+sleep 2
+
 echo "The application will be available at:"
 echo "  🌐 Frontend: http://localhost:5000"
+echo "  🔑 Admin Panel: http://localhost:5000/admin (password: admin123)"
 echo "  🔌 API: http://localhost:5000/api/products"
 echo ""
 
-# Start the simple server
-node server-simple.js
+# Start the simple server (CommonJS version for compatibility)
+PORT=5000 node server-simple.cjs

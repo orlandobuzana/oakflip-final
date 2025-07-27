@@ -1,10 +1,6 @@
-// Simple JavaScript server for older macOS systems
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Simple JavaScript server for older macOS systems - CommonJS version
+const express = require('express');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -336,6 +332,8 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Visit: http://localhost:${PORT}`);
+  console.log(`Simple E-commerce Server running on port ${PORT}`);
+  console.log(`Frontend: http://localhost:${PORT}`);
+  console.log(`Admin Panel: http://localhost:${PORT}/admin (password: admin123)`);
+  console.log(`API: http://localhost:${PORT}/api/products`);
 });
