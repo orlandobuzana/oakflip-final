@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Docker Containerization (January 27, 2025)
+- Added comprehensive Docker setup to solve tsx compatibility issues on older macOS systems
+- Created Dockerfile for production builds with Node.js 20 Alpine
+- Added Dockerfile.dev specifically for development with hot reloading
+- Implemented docker-compose.yml with MongoDB service for complete local environment
+- Added .dockerignore for optimized container builds
+- Updated README with Docker setup instructions for users experiencing compatibility issues
+
+## Previous Changes
+
 ### GitHub Documentation & Multi-Language System (January 27, 2025)
 - Created comprehensive GitHub README with deployment instructions and customization guide
 - Added detailed customization sections for branding, colors, logo, and content

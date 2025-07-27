@@ -102,6 +102,35 @@ Visit `http://localhost:5000` to see your store!
 - `npm run build` - Build project for production
 - `npm run check` - Run TypeScript type checking
 
+## 🐳 Docker Setup (Recommended for Older Systems)
+
+If you're having compatibility issues with `tsx` on older macOS systems, use Docker:
+
+### Development with Docker
+```bash
+# Start development environment
+docker-compose up dev
+
+# Or run in background
+docker-compose up -d dev
+```
+
+### Production with Docker
+```bash
+# Build and start production
+docker-compose up --build app
+
+# Or run individual container
+docker build -t rest-express .
+docker run -p 5000:5000 --env-file .env rest-express
+```
+
+### Docker Benefits
+- Consistent environment across all systems
+- No compatibility issues with tsx or Node.js versions
+- Includes MongoDB container for easy database setup
+- Hot reloading in development mode
+
 ## 🎨 Customization Guide
 
 ### 1. Brand Name and Logo
