@@ -1,14 +1,14 @@
-# Contributing to ModernShop
+# Contributing to Rest Express
 
-Thank you for your interest in contributing to ModernShop! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Rest Express! This document provides guidelines and information for contributors.
 
 ## 🚀 Getting Started
 
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/yourusername/modernshop.git
-   cd modernshop
+   git clone https://github.com/yourusername/rest-express.git
+   cd rest-express
    ```
 3. **Install dependencies**:
    ```bash
@@ -131,7 +131,7 @@ For new features:
 Understanding the codebase:
 
 ```
-modernshop/
+rest-express/
 ├── client/src/
 │   ├── components/     # Reusable UI components
 │   ├── contexts/       # React state management
@@ -218,4 +218,4 @@ Contributors will be acknowledged in:
 - **Join our community** (if applicable)
 - **Review existing issues** and pull requests
 
-Thank you for contributing to ModernShop! 🎉
+Thank you for contributing to Rest Express!

@@ -1,8 +1,8 @@
-# ModernShop E-commerce Application
+# Rest Express E-commerce Application
 
 ## Overview
 
-ModernShop is a full-stack e-commerce application built with React, Express, and MongoDB. It features a modern UI using shadcn/ui components, a responsive design, and comprehensive e-commerce functionality including product management, shopping cart, and order processing.
+Rest Express is a full-stack e-commerce application built with React, Express, and MongoDB. It features a modern UI using shadcn/ui components, a responsive design, and comprehensive e-commerce functionality including product management, shopping cart, and order processing.
 
 ## User Preferences
 

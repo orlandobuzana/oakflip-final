@@ -1,8 +1,8 @@
-# ModernShop - Full-Stack E-Commerce Platform
+# Rest Express - Full-Stack E-Commerce Platform
 
 A modern, feature-rich e-commerce application built with React, Express.js, and MongoDB. Features multi-language support, user analytics, dynamic shipping calculations, and a complete admin panel.
 
-![ModernShop Screenshot](https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600)
+![Rest Express Screenshot](https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600)
 
 ## 🚀 Features
 
@@ -44,8 +44,8 @@ A modern, feature-rich e-commerce application built with React, Express.js, and 
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/modernshop.git
-cd modernshop
+git clone https://github.com/yourusername/rest-express.git
+cd rest-express
 ```
 
 ### 2. Install Dependencies
@@ -58,8 +58,8 @@ Create a `.env` file in the root directory:
 
 ```env
 # Database Configuration
-DATABASE_URL=mongodb://localhost:27017/modernshop
-# Or for PostgreSQL: postgresql://user:password@localhost:5432/modernshop
+DATABASE_URL=mongodb://localhost:27017/rest-express
+# Or for PostgreSQL: postgresql://user:password@localhost:5432/rest-express
 
 # Session Management
 SESSION_SECRET=your-super-secret-session-key-here
@@ -93,37 +93,6 @@ npm run dev
 ```
 
 Visit `http://localhost:5000` to see your store!
-
-## 🌐 Deployment
-
-### Deploy to Replit
-1. Fork this repository
-2. Import into Replit
-3. Set environment variables in Replit Secrets
-4. Click the "Deploy" button in Replit
-
-### Deploy to Vercel
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-```
-
-### Deploy to Railway/Heroku
-1. Connect your GitHub repository
-2. Set environment variables
-3. Deploy automatically on push
-
-### Manual Server Deployment
-```bash
-# Build the application
-npm run build
-
-# Start production server
-npm start
-```
 
 ## 🎨 Customization Guide
 
@@ -254,11 +223,7 @@ PAYPAL_CLIENT_ID=your_paypal_client_id
 VITE_GA_TRACKING_ID=GA-XXXXXXXXX
 ```
 
-### Custom Domain
-```bash
-# Update REPLIT_DOMAINS for custom domain
-REPLIT_DOMAINS=yourdomain.com,www.yourdomain.com
-```
+
 
 ## 📊 Analytics Dashboard
 
@@ -321,13 +286,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 - **Documentation**: Check this README and code comments
-- **Issues**: Open a GitHub issue for bugs or feature requests
+- **Issues**: Open a GitHub issue for bugs or feature requests  
+- **Repository**: https://github.com/yourusername/rest-express
 - **Discussions**: Use GitHub Discussions for questions
 
 ## 🏗 Architecture
 
 ```
-modernshop/
+rest-express/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
@@ -350,4 +316,4 @@ modernshop/
 
 **Made with ❤️ for modern e-commerce**
 
-Ready to build something amazing? Star this repo and let's grow together! 🌟
+Ready to build something amazing? Star this repo and let's grow together!
