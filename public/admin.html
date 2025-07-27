@@ -278,9 +278,52 @@
         <main class="main-content">
             <!-- Dashboard Section -->
             <div id="dashboard" class="section active">
-                <h1 class="section-title">Dashboard Overview</h1>
-                <div class="stats-grid" id="stats-grid">
-                    <!-- Stats will be loaded here -->
+                <h1 class="section-title">📊 Dashboard Overview</h1>
+                
+                <div class="stats-grid">
+                    <!-- Total Products -->
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #2563eb;" id="total-products">6</div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                    
+                    <!-- Categories -->
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #059669;" id="total-categories">3</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                    
+                    <!-- On Sale Items -->
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #ef4444;" id="sale-items">2</div>
+                        <div class="stat-label">Sale Items</div>
+                    </div>
+                    
+                    <!-- Total Orders -->
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #7c3aed;" id="total-orders">0</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    
+                    <!-- Total Revenue -->
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #f59e0b;" id="total-revenue">$0</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    
+                    <!-- Low Stock Items -->
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: #dc2626;" id="low-stock">0</div>
+                        <div class="stat-label">Low Stock Items</div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity Summary -->
+                <div style="margin-top: 2rem; background: #f8fafc; padding: 1.5rem; border-radius: 8px;">
+                    <h3 style="margin-bottom: 1rem; color: #374151;">Recent Activity</h3>
+                    <div id="recent-activity" style="color: #6b7280;">
+                        No recent activity to display
+                    </div>
                 </div>
             </div>
 

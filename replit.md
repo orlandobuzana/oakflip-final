@@ -10,6 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Dashboard Location Fix & Spacing Improvements (January 27, 2025)
+- Moved store overview dashboard from home page to admin panel (correct location)
+- Fixed card spacing by reducing gap from 1.5rem to 1rem for better space utilization
+- Created comprehensive test runner script (run-tests.sh) with automated server management
+- Enhanced admin dashboard with color-coded statistics and recent activity section
+- Removed dashboard functions from customer-facing home page
+- Improved admin panel overview with proper metrics display
+
 ### Dedicated Product Detail Pages & Sale Indicators (January 27, 2025)
 - Created full-screen dedicated product detail pages replacing modal expansion
 - Added prominent sale symbols and badges to products with discounts
