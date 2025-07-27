@@ -101,6 +101,27 @@ let deals = [
   }
 ];
 
+let reviews = [
+  {
+    id: '1',
+    productId: '1',
+    name: 'John Smith',
+    rating: 5,
+    comment: 'Amazing headphones! Great sound quality and comfortable to wear.',
+    approved: true,
+    createdAt: new Date()
+  },
+  {
+    id: '2',
+    productId: '2',
+    name: 'Sarah Johnson',
+    rating: 4,
+    comment: 'Love this laptop! Fast and reliable for work.',
+    approved: true,
+    createdAt: new Date()
+  }
+];
+
 let orders = [];
 let users = [
   { id: '1', email: 'admin@store.com', password: 'admin123', role: 'admin', name: 'Admin User' },
@@ -418,6 +439,56 @@ app.get('/api/deals/analytics', (req, res) => {
     dealsOrders: totalOrders,
     avgDiscount
   });
+});
+
+// Reviews Management Routes
+app.get('/api/reviews', (req, res) => {
+  const status = req.query.status;
+  let filteredReviews = reviews;
+  
+  if (status === 'pending') {
+    filteredReviews = reviews.filter(r => !r.approved);
+  } else if (status === 'approved') {
+    filteredReviews = reviews.filter(r => r.approved);
+  }
+  
+  res.json(filteredReviews);
+});
+
+app.get('/api/reviews/:productId', (req, res) => {
+  const productReviews = reviews.filter(r => r.productId === req.params.productId && r.approved);
+  res.json(productReviews);
+});
+
+app.post('/api/reviews', (req, res) => {
+  const review = {
+    id: Date.now().toString(),
+    ...req.body,
+    createdAt: new Date(),
+    approved: false
+  };
+  reviews.push(review);
+  res.status(201).json(review);
+});
+
+app.put('/api/reviews/:id/approve', (req, res) => {
+  const reviewIndex = reviews.findIndex(r => r.id === req.params.id);
+  if (reviewIndex !== -1) {
+    reviews[reviewIndex].approved = true;
+    res.json(reviews[reviewIndex]);
+  } else {
+    res.status(404).json({ message: 'Review not found' });
+  }
+});
+
+app.delete('/api/reviews/:id', (req, res) => {
+  const reviewIndex = reviews.findIndex(r => r.id === req.params.id);
+  if (reviewIndex !== -1) {
+    reviews.splice(reviewIndex, 1);
+    res.status(204).send();
+  } else {
+    res.status(404).json({ message: 'Review not found' });
+  }
 });
 
 // Serve static files

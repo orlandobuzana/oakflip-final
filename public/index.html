@@ -286,8 +286,8 @@
                     <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Up to 50% off • Free shipping over $50</p>
                 </div>
                 <div style="text-align: center;">
-                    <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.25rem;" id="countdown">24:00:00</div>
-                    <div style="font-size: 0.8rem; opacity: 0.8;">Time remaining</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: white;">Limited Time!</div>
+                    <div style="font-size: 0.8rem; opacity: 0.8;">Check admin for details</div>
                 </div>
                 <div style="background: white; color: #d97706; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem; font-weight: bold;">
                     Click to Shop →
@@ -365,6 +365,42 @@
                 Total: $<span id="modal-cart-total">0.00</span>
             </div>
             <button class="btn" onclick="checkout()" id="checkout-btn">Checkout</button>
+        </div>
+    </div>
+
+    <!-- Product Reviews Modal -->
+    <div id="product-reviews-modal" class="cart-modal">
+        <div class="cart-content" style="max-width: 600px;">
+            <button class="close-btn" onclick="closeProductReviews()">&times;</button>
+            <h2 id="reviews-product-title">Product Reviews</h2>
+            
+            <!-- Add Review Form -->
+            <div id="add-review-section" style="margin-bottom: 2rem; padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                <h4>Write a Review</h4>
+                <form id="add-review-form">
+                    <input type="hidden" id="review-product-id">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <input type="text" id="review-name" placeholder="Your name" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 4px;" required>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="color: #374151;">Rating:</span>
+                            <div id="review-star-rating" style="display: flex; gap: 0.25rem;">
+                                <span class="review-star" data-rating="1" onclick="setReviewRating(1)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                                <span class="review-star" data-rating="2" onclick="setReviewRating(2)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                                <span class="review-star" data-rating="3" onclick="setReviewRating(3)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                                <span class="review-star" data-rating="4" onclick="setReviewRating(4)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                                <span class="review-star" data-rating="5" onclick="setReviewRating(5)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                            </div>
+                        </div>
+                        <textarea id="review-comment" placeholder="Tell us about your experience..." style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 4px; min-height: 100px; resize: vertical;" required></textarea>
+                        <button type="submit" class="btn">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Reviews List -->
+            <div id="reviews-list">
+                <!-- Reviews will be loaded here -->
+            </div>
         </div>
     </div>
 
@@ -473,29 +509,26 @@
                         <div class="product-description">${product.description}</div>
                         <div class="product-stock ${product.stock < 5 ? 'low' : ''}">${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</div>
                         <div class="product-price">$${product.price.toFixed(2)}</div>
-                        <div id="admin-upload-${product.id}" style="display: none; gap: 0.5rem; align-items: center; margin: 0.5rem 0;">
-                            <input type="file" id="photo-${product.id}" accept="image/*" style="display: none;" onchange="uploadProductPhoto('${product.id}', this)">
-                            <button onclick="document.getElementById('photo-${product.id}').click()" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">📷 Upload Photo</button>
+                        
+                        <!-- Customer Reviews Summary -->
+                        <div class="product-reviews" style="margin: 0.5rem 0; font-size: 0.8rem; color: #6b7280;">
+                            <div class="review-stars" id="product-stars-${product.id}">
+                                ${getProductRatingStars(product.id)}
+                            </div>
+                            <span id="product-review-count-${product.id}">${getProductReviewCount(product.id)} reviews</span>
                         </div>
+                        
                         <button class="btn" onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''}>
                             ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </button>
+                        <button class="btn" style="background: #6b7280; margin-left: 0.5rem;" onclick="showProductReviews('${product.id}')">
+                            Reviews
                         </button>
                     </div>
                 </div>
             `).join('');
             
             container.style.display = 'grid';
-            
-            // Show upload buttons only for admin users
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-            if (currentUser.role === 'admin') {
-                productsToShow.forEach(product => {
-                    const uploadDiv = document.getElementById(`admin-upload-${product.id}`);
-                    if (uploadDiv) {
-                        uploadDiv.style.display = 'flex';
-                    }
-                });
-            }
         }
 
         function addToCart(productId) {
@@ -951,13 +984,131 @@
             handleLogin(email, password);
         });
 
+        // Product Reviews System
+        let productReviews = [];
+        let currentReviewRating = 0;
+
+        function getProductRatingStars(productId) {
+            const approvedReviews = productReviews.filter(r => r.productId === productId && r.approved);
+            if (approvedReviews.length === 0) return '<span style="color: #d1d5db;">☆☆☆☆☆</span>';
+            
+            const avgRating = approvedReviews.reduce((sum, r) => sum + r.rating, 0) / approvedReviews.length;
+            return '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
+        }
+
+        function getProductReviewCount(productId) {
+            return productReviews.filter(r => r.productId === productId && r.approved).length;
+        }
+
+        function showProductReviews(productId) {
+            const product = products.find(p => p.id === productId);
+            document.getElementById('reviews-product-title').textContent = `Reviews for ${product.name}`;
+            document.getElementById('review-product-id').value = productId;
+            
+            loadProductReviews(productId);
+            document.getElementById('product-reviews-modal').style.display = 'block';
+        }
+
+        function closeProductReviews() {
+            document.getElementById('product-reviews-modal').style.display = 'none';
+            resetReviewForm();
+        }
+
+        function setReviewRating(rating) {
+            currentReviewRating = rating;
+            const stars = document.querySelectorAll('.review-star');
+            stars.forEach((star, index) => {
+                star.style.color = index < rating ? '#f59e0b' : '#d1d5db';
+            });
+        }
+
+        function resetReviewForm() {
+            document.getElementById('add-review-form').reset();
+            currentReviewRating = 0;
+            const stars = document.querySelectorAll('.review-star');
+            stars.forEach(star => star.style.color = '#d1d5db');
+        }
+
+        async function loadProductReviews(productId) {
+            try {
+                const response = await fetch(`/api/reviews/${productId}`);
+                const reviews = await response.json();
+                
+                const reviewsList = document.getElementById('reviews-list');
+                if (reviews.length === 0) {
+                    reviewsList.innerHTML = '<p style="text-align: center; color: #6b7280;">No reviews yet. Be the first to review!</p>';
+                    return;
+                }
+
+                reviewsList.innerHTML = reviews.map(review => `
+                    <div style="border-bottom: 1px solid #e5e7eb; padding: 1rem 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <strong style="color: #374151;">${review.name}</strong>
+                            <div style="color: #f59e0b;">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</div>
+                        </div>
+                        <p style="color: #6b7280; margin: 0;">${review.comment}</p>
+                        <small style="color: #9ca3af;">${new Date(review.createdAt).toLocaleDateString()}</small>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load reviews:', error);
+            }
+        }
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
             loadProductsAndDeals();
             checkAuthStatus();
             displayComments();
-            startCountdown();
             trackEvent('page_view', { page: 'home' });
+            
+            // Load all product reviews
+            loadAllReviews();
+        });
+
+        async function loadAllReviews() {
+            try {
+                const response = await fetch('/api/reviews');
+                productReviews = await response.json();
+            } catch (error) {
+                console.error('Failed to load reviews:', error);
+            }
+        }
+
+        // Form submission for reviews
+        document.getElementById('add-review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (currentReviewRating === 0) {
+                alert('Please select a rating');
+                return;
+            }
+
+            const reviewData = {
+                productId: document.getElementById('review-product-id').value,
+                name: document.getElementById('review-name').value,
+                rating: currentReviewRating,
+                comment: document.getElementById('review-comment').value,
+                approved: false // Reviews need admin approval
+            };
+
+            try {
+                const response = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reviewData)
+                });
+
+                if (response.ok) {
+                    showSuccess('Review submitted! It will appear after admin approval.');
+                    resetReviewForm();
+                    closeProductReviews();
+                } else {
+                    throw new Error('Failed to submit review');
+                }
+            } catch (error) {
+                showError('Failed to submit review. Please try again.');
+            }
         });
 
         // Update loadProducts to also load deals
