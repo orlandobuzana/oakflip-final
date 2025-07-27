@@ -280,6 +280,26 @@
         </div>
     </section>
 
+    <!-- Special Deals Products -->
+    <section id="deals-products" style="margin-bottom: 2rem;">
+        <div class="container">
+            <h3 style="text-align: center; margin-bottom: 1.5rem; color: #374151;">🎯 Featured Deals</h3>
+            <div id="deals-container" class="products-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <!-- Deals products will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Special Deals Products -->
+    <section id="deals-products" style="margin-bottom: 2rem;">
+        <div class="container">
+            <h3 style="text-align: center; margin-bottom: 1.5rem; color: #374151;">🎯 Featured Deals</h3>
+            <div id="deals-container" class="products-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <!-- Deals products will be loaded here -->
+            </div>
+        </div>
+    </section>
+
     <main class="container">
         <div id="error-message"></div>
         <div id="success-message"></div>
@@ -437,9 +457,9 @@
                         <div class="product-description">${product.description}</div>
                         <div class="product-stock ${product.stock < 5 ? 'low' : ''}">${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</div>
                         <div class="product-price">$${product.price.toFixed(2)}</div>
-                        <div style="display: flex; gap: 0.5rem; align-items: center; margin: 0.5rem 0;">
+                        <div id="admin-upload-${product.id}" style="display: none; gap: 0.5rem; align-items: center; margin: 0.5rem 0;">
                             <input type="file" id="photo-${product.id}" accept="image/*" style="display: none;" onchange="uploadProductPhoto('${product.id}', this)">
-                            <button onclick="document.getElementById('photo-${product.id}').click()" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">📷 Upload</button>
+                            <button onclick="document.getElementById('photo-${product.id}').click()" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">📷 Upload Photo</button>
                         </div>
                         <button class="btn" onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''}>
                             ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -449,6 +469,17 @@
             `).join('');
             
             container.style.display = 'grid';
+            
+            // Show upload buttons only for admin users
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (currentUser.role === 'admin') {
+                productsToShow.forEach(product => {
+                    const uploadDiv = document.getElementById(`admin-upload-${product.id}`);
+                    if (uploadDiv) {
+                        uploadDiv.style.display = 'flex';
+                    }
+                });
+            }
         }
 
         function addToCart(productId) {
@@ -783,7 +814,42 @@
         }
 
         function scrollToDeals() {
-            document.getElementById('products-container').scrollIntoView({behavior: 'smooth'});
+            document.getElementById('deals-products').scrollIntoView({behavior: 'smooth'});
+        }
+
+        function displayDeals() {
+            const dealsContainer = document.getElementById('deals-container');
+            
+            // Show products with discounts or featured deals
+            const dealProducts = products.filter(product => 
+                product.category === '1' || product.category === '2' || product.id === '1' || product.id === '3' || product.id === '5'
+            ).slice(0, 3);
+            
+            dealsContainer.innerHTML = dealProducts.map(product => {
+                const discountPercent = Math.floor(Math.random() * 30) + 20; // 20-50% discount
+                const originalPrice = product.price * (1 + discountPercent / 100);
+                
+                return `
+                    <div class="product-card" style="border: 2px solid #f59e0b; position: relative;">
+                        <div style="position: absolute; top: 0.5rem; right: 0.5rem; background: #dc2626; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">
+                            -${discountPercent}%
+                        </div>
+                        <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=Product+Image'">
+                        <div class="product-content">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-description">${product.description}</div>
+                            <div class="product-stock ${product.stock < 5 ? 'low' : ''}">${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0;">
+                                <div style="text-decoration: line-through; color: #6b7280; font-size: 0.9rem;">$${originalPrice.toFixed(2)}</div>
+                                <div class="product-price" style="color: #dc2626; font-size: 1.2rem; font-weight: bold;">$${product.price.toFixed(2)}</div>
+                            </div>
+                            <button class="btn" style="background: #f59e0b; border: none;" onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''}>
+                                ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart - DEAL!'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         // Photo upload function
@@ -841,12 +907,18 @@
 
         // Initialize the app
         document.addEventListener('DOMContentLoaded', () => {
-            loadProducts();
+            loadProductsAndDeals();
             checkAuthStatus();
             displayComments();
             startCountdown();
             trackEvent('page_view', { page: 'home' });
         });
+
+        // Update loadProducts to also load deals
+        async function loadProductsAndDeals() {
+            await loadProducts();
+            displayDeals();
+        }
 
         // Close cart modal when clicking outside
         document.getElementById('cart-modal').addEventListener('click', (e) => {
