@@ -53,8 +53,8 @@
         
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 3rem;
         }
         
@@ -63,11 +63,15 @@
             border-radius: 8px;
             padding: 1.5rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         
         .product-card:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
         
         .product-image {
@@ -76,24 +80,47 @@
             object-fit: cover;
             border-radius: 6px;
             margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .product-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-name {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
+            color: #1f2937;
+            line-height: 1.4;
         }
         
         .product-description {
             color: #666;
             margin-bottom: 1rem;
+            flex: 1;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
         
         .product-price {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #2563eb;
             margin-bottom: 1rem;
+        }
+        
+        .product-stock {
+            font-size: 0.85rem;
+            color: #059669;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .product-stock.low {
+            color: #dc2626;
         }
         
         .btn {
@@ -196,12 +223,12 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">Rest Express</div>
-                <nav style="display: flex; align-items: center; gap: 1rem;">
-                    <select id="category-filter" onchange="filterByCategory()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                <nav style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <select id="category-filter" onchange="filterByCategory()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd; min-width: 120px;">
                         <option value="">All Categories</option>
                     </select>
-                    <a href="/admin" style="color: #2563eb; text-decoration: none; padding: 0.5rem 1rem; border: 1px solid #2563eb; border-radius: 4px;">Admin</a>
-                    <div class="cart-info" onclick="toggleCart()">
+                    <a href="/admin" style="color: #2563eb; text-decoration: none; padding: 0.5rem 1rem; border: 1px solid #2563eb; border-radius: 4px; font-size: 0.9rem;">Admin Panel</a>
+                    <div class="cart-info" onclick="toggleCart()" style="margin-left: auto;">
                         Cart (<span id="cart-count">0</span>) - $<span id="cart-total">0.00</span>
                     </div>
                 </nav>
@@ -281,10 +308,15 @@
             container.innerHTML = productsToShow.map(product => `
                 <div class="product-card">
                     <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=Product+Image'">
-                    <div class="product-name">${product.name}</div>
-                    <div class="product-description">${product.description}</div>
-                    <div class="product-price">$${product.price.toFixed(2)}</div>
-                    <button class="btn" onclick="addToCart('${product.id}')">Add to Cart</button>
+                    <div class="product-content">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-description">${product.description}</div>
+                        <div class="product-stock ${product.stock < 5 ? 'low' : ''}">${product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}</div>
+                        <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <button class="btn" onclick="addToCart('${product.id}')" ${product.stock === 0 ? 'disabled' : ''}>
+                            ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </button>
+                    </div>
                 </div>
             `).join('');
             
@@ -293,9 +325,16 @@
 
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
-            if (!product) return;
+            if (!product || product.stock === 0) return;
 
             const existingItem = cart.find(item => item.id === productId);
+            const currentQuantity = existingItem ? existingItem.quantity : 0;
+            
+            if (currentQuantity >= product.stock) {
+                showError(`Sorry, only ${product.stock} items available in stock.`);
+                return;
+            }
+
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {

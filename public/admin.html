@@ -259,6 +259,7 @@
         <nav>
             <a href="/" class="nav-link">View Store</a>
             <a href="/admin" class="nav-link">Dashboard</a>
+            <button onclick="logout()" class="nav-link" style="background: none; border: none; cursor: pointer;">Logout</button>
         </nav>
     </header>
 
@@ -440,9 +441,37 @@
         let products = [];
         let orders = [];
         let users = [];
+        let isAuthenticated = false;
+
+        // Simple admin authentication
+        function checkAdminAuth() {
+            const adminPassword = localStorage.getItem('adminAuth');
+            if (adminPassword === 'admin123') {
+                isAuthenticated = true;
+                return true;
+            }
+            
+            const password = prompt('Enter admin password:');
+            if (password === 'admin123') {
+                localStorage.setItem('adminAuth', 'admin123');
+                isAuthenticated = true;
+                return true;
+            } else {
+                alert('Access denied. Redirecting to store...');
+                window.location.href = '/';
+                return false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminAuth');
+            window.location.href = '/';
+        }
 
         // Load initial data
         async function loadDashboard() {
+            if (!checkAdminAuth()) return;
+            
             await Promise.all([
                 loadStats(),
                 loadProducts(),
