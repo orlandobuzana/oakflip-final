@@ -222,15 +222,25 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">Rest Express</div>
+                <div class="logo" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg width="32" height="32" viewBox="0 0 32 32" style="fill: #2563eb;">
+                        <path d="M16 2L4 8v16l12 6 12-6V8L16 2zm0 4l8 4v12l-8 4-8-4V10l8-4z"/>
+                        <circle cx="16" cy="16" r="4"/>
+                    </svg>
+                    Rest Express
+                </div>
                 <nav style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
                     <select id="category-filter" onchange="filterByCategory()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd; min-width: 120px;">
                         <option value="">All Categories</option>
                     </select>
                     <div id="auth-section" style="display: flex; align-items: center; gap: 1rem;">
+                        <button id="signup-btn" onclick="showSignup()" style="color: #059669; background: none; border: 1px solid #059669; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Sign Up</button>
                         <button id="login-btn" onclick="showLogin()" style="color: #2563eb; background: none; border: 1px solid #2563eb; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Login</button>
-                        <div id="admin-section" style="display: none; gap: 1rem;">
-                            <a href="/admin" style="color: #2563eb; text-decoration: none; padding: 0.5rem 1rem; border: 1px solid #2563eb; border-radius: 4px; font-size: 0.9rem;">Admin Panel</a>
+                        <div id="user-section" style="display: none; gap: 1rem; align-items: center;">
+                            <span id="user-name" style="font-weight: bold; color: #374151;"></span>
+                            <div id="admin-section" style="display: none; gap: 1rem;">
+                                <a href="/admin" style="color: #2563eb; text-decoration: none; padding: 0.5rem 1rem; border: 1px solid #2563eb; border-radius: 4px; font-size: 0.9rem;">Admin Panel</a>
+                            </div>
                             <button onclick="logout()" style="color: #dc2626; background: none; border: 1px solid #dc2626; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Logout</button>
                         </div>
                     </div>
@@ -242,6 +252,32 @@
         </div>
     </header>
 
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Welcome to Rest Express</h1>
+            <p>Discover amazing products at unbeatable prices</p>
+            <button class="btn" onclick="document.getElementById('products-container').scrollIntoView({behavior: 'smooth'})">Shop Now</button>
+        </div>
+    </section>
+
+    <!-- Deals Widget -->
+    <section class="deals-section" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 2rem 0; margin-bottom: 2rem;">
+        <div class="container">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h2 style="margin: 0; font-size: 1.5rem; margin-bottom: 0.5rem;">🔥 Limited Time Offers</h2>
+                    <p style="margin: 0; opacity: 0.9;">Up to 50% off on selected items • Free shipping on orders over $50</p>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;" id="countdown">24:00:00</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Time remaining</div>
+                </div>
+                <button class="btn" style="background: white; color: #d97706; border: none; font-weight: bold;" onclick="scrollToDeals()">Shop Deals</button>
+            </div>
+        </div>
+    </section>
+
     <main class="container">
         <div id="error-message"></div>
         <div id="success-message"></div>
@@ -251,6 +287,34 @@
         <div id="products-container" class="products-grid" style="display: none;">
             <!-- Products will be loaded here -->
         </div>
+
+        <!-- Comments Section -->
+        <section id="comments-section" style="margin-top: 3rem; padding: 2rem; background: #f8fafc; border-radius: 8px;">
+            <h3 style="margin-bottom: 1.5rem; color: #374151;">Customer Reviews</h3>
+            
+            <div id="add-comment" style="margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <h4 style="margin-bottom: 1rem; color: #374151;">Share your experience</h4>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <input type="text" id="comment-name" placeholder="Your name" style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 4px;" required>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span style="color: #374151;">Rating:</span>
+                        <div id="star-rating" style="display: flex; gap: 0.25rem;">
+                            <span class="star" data-rating="1" onclick="setRating(1)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                            <span class="star" data-rating="2" onclick="setRating(2)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                            <span class="star" data-rating="3" onclick="setRating(3)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                            <span class="star" data-rating="4" onclick="setRating(4)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                            <span class="star" data-rating="5" onclick="setRating(5)" style="cursor: pointer; font-size: 1.5rem; color: #d1d5db;">★</span>
+                        </div>
+                    </div>
+                    <textarea id="comment-text" placeholder="Write your review..." style="padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical; min-height: 100px;" required></textarea>
+                    <button onclick="submitComment()" class="btn" style="align-self: flex-start;">Submit Review</button>
+                </div>
+            </div>
+
+            <div id="comments-list">
+                <!-- Comments will be loaded here -->
+            </div>
+        </section>
     </main>
 
     <!-- Cart Modal -->
@@ -266,11 +330,41 @@
         </div>
     </div>
 
+    <!-- Sign Up Modal -->
+    <div id="signup-modal" class="cart-modal">
+        <div class="cart-content">
+            <button class="close-btn" onclick="closeSignup()">&times;</button>
+            <h2>Create Account</h2>
+            <form id="signup-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Full Name:</label>
+                    <input type="text" id="signup-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Email:</label>
+                    <input type="email" id="signup-email" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Password:</label>
+                    <input type="password" id="signup-password" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Confirm Password:</label>
+                    <input type="password" id="signup-confirm" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                Already have an account? <a href="#" onclick="showLogin(); closeSignup();" style="color: #2563eb;">Login here</a>
+            </p>
+        </div>
+    </div>
+
     <!-- Login Modal -->
     <div id="login-modal" class="cart-modal">
         <div class="cart-content">
             <button class="close-btn" onclick="closeLogin()">&times;</button>
-            <h2>Admin Login</h2>
+            <h2>Login</h2>
             <form id="login-form" style="display: flex; flex-direction: column; gap: 1rem;">
                 <div>
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Email:</label>
@@ -283,7 +377,9 @@
                 <button type="submit" class="btn">Login</button>
             </form>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
-                Demo admin: admin@store.com / admin123
+                Demo admin: admin@store.com / admin123<br>
+                Demo customer: customer@email.com / password123<br>
+                <a href="#" onclick="showSignup(); closeLogin();" style="color: #2563eb;">Don't have an account? Sign up</a>
             </p>
         </div>
     </div>
@@ -517,13 +613,20 @@
         }
 
         function showAdminUI(user) {
+            document.getElementById('signup-btn').style.display = 'none';
             document.getElementById('login-btn').style.display = 'none';
-            document.getElementById('admin-section').style.display = 'flex';
+            document.getElementById('user-section').style.display = 'flex';
+            document.getElementById('user-name').textContent = `Welcome, ${user.name}`;
+            if (user.role === 'admin') {
+                document.getElementById('admin-section').style.display = 'flex';
+            }
         }
 
         function logout() {
             localStorage.removeItem('currentUser');
+            document.getElementById('signup-btn').style.display = 'block';
             document.getElementById('login-btn').style.display = 'block';
+            document.getElementById('user-section').style.display = 'none';
             document.getElementById('admin-section').style.display = 'none';
             showSuccess('Logged out successfully');
         }
@@ -556,7 +659,145 @@
             }
         }
 
-        // Login form handler
+        // Sign up functions
+        function showSignup() {
+            document.getElementById('signup-modal').style.display = 'block';
+        }
+
+        function closeSignup() {
+            document.getElementById('signup-modal').style.display = 'none';
+        }
+
+        async function handleSignup(name, email, password) {
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, role: 'customer' })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to create account');
+                }
+
+                const user = await response.json();
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showAdminUI(user);
+                showSuccess(`Account created successfully! Welcome, ${user.name}!`);
+                closeSignup();
+            } catch (error) {
+                showError(error.message || 'Failed to create account');
+            }
+        }
+
+        // Comments system
+        let currentRating = 0;
+        let comments = JSON.parse(localStorage.getItem('comments') || '[]');
+
+        function setRating(rating) {
+            currentRating = rating;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                star.style.color = index < rating ? '#fbbf24' : '#d1d5db';
+            });
+        }
+
+        function submitComment() {
+            const name = document.getElementById('comment-name').value;
+            const text = document.getElementById('comment-text').value;
+            
+            if (!name || !text || currentRating === 0) {
+                showError('Please fill in all fields and select a rating');
+                return;
+            }
+
+            const comment = {
+                id: Date.now(),
+                name,
+                text,
+                rating: currentRating,
+                date: new Date().toLocaleDateString()
+            };
+
+            comments.unshift(comment);
+            localStorage.setItem('comments', JSON.stringify(comments));
+            
+            // Clear form
+            document.getElementById('comment-name').value = '';
+            document.getElementById('comment-text').value = '';
+            setRating(0);
+            
+            displayComments();
+            showSuccess('Review submitted successfully!');
+        }
+
+        function displayComments() {
+            const commentsList = document.getElementById('comments-list');
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<p style="color: #6b7280; font-style: italic;">No reviews yet. Be the first to share your experience!</p>';
+                return;
+            }
+
+            commentsList.innerHTML = comments.map(comment => `
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <h5 style="margin: 0; color: #374151; font-weight: bold;">${comment.name}</h5>
+                            <div style="display: flex; gap: 0.25rem; margin: 0.5rem 0;">
+                                ${Array.from({length: 5}, (_, i) => 
+                                    `<span style="color: ${i < comment.rating ? '#fbbf24' : '#d1d5db'};">★</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        <span style="color: #6b7280; font-size: 0.9rem;">${comment.date}</span>
+                    </div>
+                    <p style="margin: 0; color: #374151; line-height: 1.5;">${comment.text}</p>
+                </div>
+            `).join('');
+        }
+
+        // Deals countdown timer
+        function startCountdown() {
+            let timeLeft = 24 * 60 * 60; // 24 hours in seconds
+            
+            const timer = setInterval(() => {
+                const hours = Math.floor(timeLeft / 3600);
+                const minutes = Math.floor((timeLeft % 3600) / 60);
+                const seconds = timeLeft % 60;
+                
+                document.getElementById('countdown').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                timeLeft--;
+                
+                if (timeLeft < 0) {
+                    clearInterval(timer);
+                    document.getElementById('countdown').textContent = '00:00:00';
+                }
+            }, 1000);
+        }
+
+        function scrollToDeals() {
+            document.getElementById('products-container').scrollIntoView({behavior: 'smooth'});
+        }
+
+        // Form handlers
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            
+            if (password !== confirm) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            handleSignup(name, email, password);
+        });
+
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -568,6 +809,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadProducts();
             checkAuthStatus();
+            displayComments();
+            startCountdown();
             trackEvent('page_view', { page: 'home' });
         });
 

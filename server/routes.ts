@@ -429,6 +429,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true, language });
   });
 
+  // Authentication routes
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // For demo purposes, hardcoded users
+      const users = [
+        { id: '1', email: 'admin@store.com', password: 'admin123', role: 'admin', name: 'Admin User' },
+        { id: '2', email: 'customer@email.com', password: 'password123', role: 'customer', name: 'Demo Customer' }
+      ];
+      
+      const user = users.find(u => u.email === email && u.password === password);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: 'Login failed' });
+    }
+  });
+
+  app.post('/api/auth/signup', async (req, res) => {
+    try {
+      const { name, email, password, role } = req.body;
+      
+      // For demo purposes, just return a new user object
+      const newUser = {
+        id: Date.now().toString(),
+        name,
+        email,
+        role: role || 'customer'
+      };
+      
+      res.json(newUser);
+    } catch (error) {
+      res.status(500).json({ message: 'Signup failed' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

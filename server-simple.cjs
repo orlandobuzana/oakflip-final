@@ -221,6 +221,30 @@ app.post('/api/auth/login', (req, res) => {
   res.json(userWithoutPassword);
 });
 
+app.post('/api/auth/signup', (req, res) => {
+  const { name, email, password, role } = req.body;
+  
+  // Check if user already exists
+  const existingUser = users.find(u => u.email === email);
+  if (existingUser) {
+    return res.status(400).json({ message: 'User already exists with this email' });
+  }
+  
+  const newUser = {
+    id: Date.now().toString(),
+    name,
+    email,
+    password,
+    role: role || 'customer'
+  };
+  
+  users.push(newUser);
+  
+  // Return user without password
+  const { password: _, ...userWithoutPassword } = newUser;
+  res.json(userWithoutPassword);
+});
+
 // Analytics
 app.post('/api/analytics/page-view', (req, res) => {
   analytics.pageViews++;
