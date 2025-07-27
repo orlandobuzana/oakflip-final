@@ -701,47 +701,23 @@
             
             container.innerHTML = productsToShow.map(product => {
                 const productImages = product.images || [product.image];
-                const productSpecs = product.specs || {};
                 
                 return `
                 <div class="product-card" style="cursor: pointer; width: 400px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; background: white; transition: transform 0.2s, box-shadow 0.2s; margin-bottom: 1rem;" 
                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'" 
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'"
-                     onclick="showProductDetails(products.find(p => p.id === '${product.id}'))">
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
                     
                     <!-- Main Image -->
                     <div style="position: relative; margin-bottom: 1rem;">
-                        <img src="${product.image}" alt="${product.name}" 
+                        <img class="main-image" src="${product.image}" alt="${product.name}" 
                              style="width: 100%; height: 250px; object-fit: cover; border-radius: 6px;" 
                              onerror="this.src='https://via.placeholder.com/400x250?text=Product+Image'">
                         ${product.stock < 5 && product.stock > 0 ? '<div style="position: absolute; top: 8px; right: 8px; background: #ef4444; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Low Stock</div>' : ''}
                     </div>
                     
-                    <!-- Product Gallery Thumbnails -->
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center;">
-                        ${productImages.slice(0, 4).map((img, index) => `
-                            <img src="${img}" alt="Product view ${index + 1}" 
-                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 2px solid ${index === 0 ? '#2563eb' : 'transparent'}; cursor: pointer;"
-                                 onclick="event.stopPropagation(); document.querySelector('[data-product-id=\\'${product.id}\\'] .main-image').src = '${img}'">
-                        `).join('')}
-                    </div>
-                    
                     <div class="product-content" data-product-id="${product.id}">
                         <div class="product-name" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem;">${product.name}</div>
                         <div class="product-description" style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">${product.description}</div>
-                        
-                        <!-- Quick Specs Preview -->
-                        ${Object.keys(productSpecs).length > 0 ? `
-                        <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem;">
-                            <div style="font-weight: 600; margin-bottom: 0.5rem; color: #374151;">Key Features:</div>
-                            ${Object.entries(productSpecs).slice(0, 3).map(([key, value]) => `
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                                    <span style="color: #6b7280;">${key.charAt(0).toUpperCase() + key.slice(1)}:</span>
-                                    <span style="font-weight: 500; color: #374151;">${value}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                        ` : ''}
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <div class="product-price" style="font-size: 1.25rem; font-weight: bold; color: #059669;">$${product.price.toFixed(2)}</div>
@@ -750,7 +726,7 @@
                             </div>
                         </div>
                         
-                        <!-- Customer Reviews Summary -->
+                        <!-- Basic Reviews Summary -->
                         <div class="product-reviews" style="margin: 0.75rem 0; font-size: 0.85rem; color: #6b7280; text-align: center;">
                             <div class="review-stars" id="product-stars-${product.id}" style="margin-bottom: 0.25rem;">
                                 ${getProductRatingStars(product.id)}
@@ -758,18 +734,43 @@
                             <span id="product-review-count-${product.id}">${getProductReviewCount(product.id)} customer reviews</span>
                         </div>
                         
-                        <!-- Heart Rating -->
-                        <div id="customer-rating-${product.id}" style="text-align: center; margin: 0.75rem 0;">
-                            <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 0.25rem;">Rate this product:</div>
-                            <div style="display: flex; justify-content: center; gap: 0.25rem;">
-                                ${[1,2,3,4,5].map(rating => `
-                                    <span class="rating-heart" data-rating="${rating}" 
-                                          style="font-size: 1.2rem; cursor: pointer; color: #d1d5db; transition: color 0.2s;"
-                                          onclick="event.stopPropagation(); rateProduct('${product.id}', ${rating})">♥</span>
+                        <!-- Product Details (Hidden by Default) -->
+                        <div class="product-details" id="details-${product.id}" style="display: none;">
+                            <!-- Product Gallery Thumbnails -->
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; justify-content: center;">
+                                ${productImages.slice(0, 4).map((img, index) => `
+                                    <img src="${img}" alt="Product view ${index + 1}" 
+                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 2px solid ${index === 0 ? '#2563eb' : 'transparent'}; cursor: pointer;"
+                                         onclick="changeMainImage('${product.id}', '${img}', this)">
                                 `).join('')}
                             </div>
-                            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">
-                                ${getProductAverageRating(product.id)} avg (${getProductRatingCount(product.id)} ratings)
+                            
+                            <!-- Product Specifications -->
+                            ${product.specs && Object.keys(product.specs).length > 0 ? `
+                            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem;">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem; color: #374151;">Product Specifications:</div>
+                                ${Object.entries(product.specs).map(([key, value]) => `
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                        <span style="color: #6b7280;">${key.charAt(0).toUpperCase() + key.slice(1)}:</span>
+                                        <span style="font-weight: 500; color: #374151;">${value}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Heart Rating -->
+                            <div id="customer-rating-${product.id}" style="text-align: center; margin: 0.75rem 0;">
+                                <div style="font-size: 0.8rem; color: #6b7280; margin-bottom: 0.25rem;">Rate this product:</div>
+                                <div style="display: flex; justify-content: center; gap: 0.25rem;">
+                                    ${[1,2,3,4,5].map(rating => `
+                                        <span class="rating-heart" data-rating="${rating}" 
+                                              style="font-size: 1.2rem; cursor: pointer; color: #d1d5db; transition: color 0.2s;"
+                                              onclick="event.stopPropagation(); rateProduct('${product.id}', ${rating})">♥</span>
+                                    `).join('')}
+                                </div>
+                                <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">
+                                    ${getProductAverageRating(product.id)} avg (${getProductRatingCount(product.id)} ratings)
+                                </div>
                             </div>
                         </div>
                         
@@ -779,7 +780,7 @@
                                 ${product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                             </button>
                             <button class="btn" style="background: #374151; color: white; padding: 0.75rem; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;" 
-                                    onclick="event.stopPropagation(); showProductDetails(products.find(p => p.id === '${product.id}'))">
+                                    onclick="event.stopPropagation(); toggleProductDetails('${product.id}')">
                                 Details
                             </button>
                         </div>
@@ -792,6 +793,38 @@
             container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(400px, 1fr))';
             container.style.gap = '1.5rem';
             container.style.justifyItems = 'center';
+        }
+        
+        function toggleProductDetails(productId) {
+            const detailsElement = document.getElementById(`details-${productId}`);
+            const button = event.target;
+            
+            if (detailsElement.style.display === 'none' || detailsElement.style.display === '') {
+                detailsElement.style.display = 'block';
+                button.textContent = 'Hide';
+                button.style.background = '#dc2626';
+            } else {
+                detailsElement.style.display = 'none';
+                button.textContent = 'Details';
+                button.style.background = '#374151';
+            }
+        }
+        
+        function changeMainImage(productId, newImageSrc, clickedThumbnail) {
+            // Find the main image within this product card
+            const productCard = clickedThumbnail.closest('.product-card');
+            const mainImage = productCard.querySelector('.main-image');
+            
+            if (mainImage) {
+                mainImage.src = newImageSrc;
+            }
+            
+            // Update thumbnail borders
+            const allThumbnails = productCard.querySelectorAll('[onclick^="changeMainImage"]');
+            allThumbnails.forEach(thumb => {
+                thumb.style.border = '2px solid transparent';
+            });
+            clickedThumbnail.style.border = '2px solid #2563eb';
         }
 
         function addToCart(productId) {

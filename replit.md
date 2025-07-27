@@ -10,6 +10,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Enhanced Product Cards with Conditional Details Display (January 27, 2025)
+- Implemented conditional product details display - only shown when "Details" button is pressed
+- Enhanced product cards (400px wide) with multiple image galleries and specifications
+- Fixed thumbnail clicking functionality to properly change main product image
+- Added small product images (60x60px) to shopping cart for better item identification
+- Created toggle functionality for Details button (shows/hides extended product information)
+- Improved main image changing mechanism with proper thumbnail border highlighting
+- Enhanced cart with quantity controls, product thumbnails, and real-time calculations
+
 ### Product Detail Page Integration & Testing Suite (January 27, 2025)
 - Converted bottom modal product details into full dedicated product page
 - Integrated heart ratings and written reviews into single comprehensive page
