@@ -10,13 +10,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Docker Containerization (January 27, 2025)
+### Docker Containerization + Legacy macOS Support (January 27, 2025)
 - Added comprehensive Docker setup to solve tsx compatibility issues on older macOS systems
 - Created Dockerfile for production builds with Node.js 20 Alpine
 - Added Dockerfile.dev specifically for development with hot reloading
 - Implemented docker-compose.yml with MongoDB service for complete local environment
 - Added .dockerignore for optimized container builds
-- Updated README with Docker setup instructions for users experiencing compatibility issues
+- Created alternative setup methods for older macOS systems where Docker may not work
+- Added nvm + Node.js 18 setup as primary alternative for older systems
+- Created ts-node fallback option for tsx compatibility issues
+- Added setup-legacy-mac.sh automated setup script for older macOS
+- Included pre-compiled JavaScript option as most compatible fallback
+- Updated README with comprehensive setup options ranked by compatibility
 
 ## Previous Changes
 

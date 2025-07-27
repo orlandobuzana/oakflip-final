@@ -102,9 +102,80 @@ Visit `http://localhost:5000` to see your store!
 - `npm run build` - Build project for production
 - `npm run check` - Run TypeScript type checking
 
-## 🐳 Docker Setup (Recommended for Older Systems)
+## 🔧 Alternative Setup Methods for Older Systems
 
-If you're having compatibility issues with `tsx` on older macOS systems, use Docker for a consistent environment across all platforms.
+### Method 1: Node Version Manager (Recommended for Older macOS)
+
+If Docker isn't compatible with your older macOS, use Node Version Manager:
+
+**Install nvm:**
+```bash
+# Install nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+# Restart terminal or run:
+source ~/.bashrc
+
+# Install and use Node.js 18 (more compatible with older systems)
+nvm install 18
+nvm use 18
+nvm alias default 18
+```
+
+**Quick Setup Script:**
+```bash
+# Clone and auto-setup for older macOS
+git clone https://github.com/yourusername/rest-express.git
+cd rest-express
+chmod +x setup-legacy-mac.sh
+./setup-legacy-mac.sh
+```
+
+**Manual Setup:**
+```bash
+# Clone and setup
+git clone https://github.com/yourusername/rest-express.git
+cd rest-express
+npm install
+npm run dev
+```
+
+### Method 2: Alternative to tsx
+
+Replace tsx with ts-node for better compatibility:
+
+```bash
+# Install ts-node globally
+npm install -g ts-node
+
+# Or modify package.json scripts:
+```
+
+Edit `package.json`:
+```json
+{
+  "scripts": {
+    "dev": "NODE_ENV=development ts-node --esm server/index.ts",
+    "dev:legacy": "NODE_ENV=development node --loader ts-node/esm server/index.ts"
+  }
+}
+```
+
+### Method 3: Pre-compiled JavaScript
+
+Build to JavaScript and run directly:
+
+```bash
+# Build the TypeScript
+npm run build
+
+# Run the built JavaScript
+npm start
+```
+
+## 🐳 Docker Setup (For Compatible Systems)
+
+If your system supports Docker, this provides the most consistent environment:
 
 ### Prerequisites
 1. **Install Docker Desktop**: Download from [docker.com](https://www.docker.com/products/docker-desktop)
@@ -270,16 +341,21 @@ docker ps -a
 - **Admin Panel**: http://localhost:5000/admin
 - **API Documentation**: All endpoints available at `/api/*`
 
-### Docker vs Native Development
+### Method Comparison for Older macOS
 
-| Feature | Native | Docker |
-|---------|--------|--------|
-| Setup Time | Fast | Medium |
-| Compatibility | System-dependent | Universal |
-| Memory Usage | Lower | Higher |
-| Hot Reloading | ✅ | ✅ |
-| Database Setup | Manual | Automatic |
-| tsx Issues | Possible | None |
+| Feature | nvm + Node 18 | ts-node | Pre-compiled JS | Docker |
+|---------|-------------|---------|----------------|--------|
+| macOS Compatibility | ✅ High | ✅ High | ✅ Highest | ❌ Limited |
+| Setup Complexity | Low | Low | Medium | High |
+| Memory Usage | Low | Low | Lowest | High |
+| Hot Reloading | ✅ | ✅ | ❌ | ✅ |
+| TypeScript Support | ✅ | ✅ | Build-time only | ✅ |
+
+### Recommended Approach for Older macOS:
+1. **First try**: nvm with Node.js 18
+2. **If tsx still fails**: Switch to ts-node
+3. **For production**: Use pre-compiled JavaScript
+4. **Last resort**: Docker (if your macOS version supports it)
 
 ## 🎨 Customization Guide
 
