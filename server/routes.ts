@@ -107,6 +107,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shipping routes
+  app.post("/api/shipping/calculate", async (req, res) => {
+    try {
+      const { state, subtotal, itemCount } = req.body;
+      
+      if (!state || !subtotal || !itemCount) {
+        return res.status(400).json({ message: "State, subtotal, and item count are required" });
+      }
+
+      const { calculateShippingRates, calculateTax } = await import('./shippingRates');
+      
+      const shippingRates = calculateShippingRates(state, parseFloat(subtotal), parseInt(itemCount));
+      const tax = calculateTax(parseFloat(subtotal), state);
+      
+      res.json({
+        shippingRates,
+        tax: tax.toFixed(2),
+        taxRate: state
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to calculate shipping rates" });
+    }
+  });
+
   // Orders routes
   app.get("/api/orders", async (req, res) => {
     try {

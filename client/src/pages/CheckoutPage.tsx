@@ -28,8 +28,21 @@ interface CheckoutForm {
   specialInstructions: string;
 }
 
+interface ShippingRate {
+  method: string;
+  cost: number;
+  estimatedDays: string;
+  description: string;
+}
+
+interface ShippingCalculation {
+  shippingRates: ShippingRate[];
+  tax: string;
+  taxRate: string;
+}
+
 export default function CheckoutPage() {
-  const { items, totalAmount, clearCart } = useCart();
+  const { items, total: totalAmount, clearCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -51,44 +64,95 @@ export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [availableDeals, setAvailableDeals] = useState<any[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<string>("");
-  const [finalAmount, setFinalAmount] = useState(totalAmount);
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingRate | null>(null);
+  const [taxAmount, setTaxAmount] = useState<number>(0);
+  const [finalAmount, setFinalAmount] = useState(totalAmount || 0);
+  const [isCalculatingShipping, setIsCalculatingShipping] = useState(false);
 
   // Fetch available deals using useQuery
   const { data: allDeals } = useQuery({
     queryKey: ["/api/deals"],
-    enabled: items.length > 0,
+    enabled: items && items.length > 0,
   });
 
   // Filter active deals
   useEffect(() => {
-    if (allDeals) {
+    if (allDeals && Array.isArray(allDeals)) {
       const activeDeals = allDeals.filter((deal: any) => 
         deal.isActive && 
         new Date(deal.startDate) <= new Date() && 
         new Date(deal.endDate) >= new Date() &&
-        totalAmount >= deal.minOrderAmount
+        (totalAmount || 0) >= deal.minOrderAmount
       );
       setAvailableDeals(activeDeals);
     }
   }, [allDeals, totalAmount]);
 
-  // Calculate final amount with selected deal
+  // Calculate shipping rates when state changes
+  const calculateShipping = async (state: string) => {
+    if (!state || !items || items.length === 0) return;
+    
+    setIsCalculatingShipping(true);
+    try {
+      const response = await apiRequest("POST", "/api/shipping/calculate", {
+        state,
+        subtotal: (totalAmount || 0).toString(),
+        itemCount: items.reduce((sum, item) => sum + item.quantity, 0)
+      });
+      
+      setShippingRates(response.shippingRates);
+      setTaxAmount(parseFloat(response.tax));
+      
+      // Auto-select cheapest shipping option
+      if (response.shippingRates.length > 0) {
+        const cheapest = response.shippingRates.reduce((prev: ShippingRate, curr: ShippingRate) => 
+          prev.cost < curr.cost ? prev : curr
+        );
+        setSelectedShipping(cheapest);
+      }
+    } catch (error) {
+      console.error("Failed to calculate shipping:", error);
+      toast({
+        title: "Shipping Calculation Error",
+        description: "Unable to calculate shipping rates. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCalculatingShipping(false);
+    }
+  };
+
+  // Calculate shipping when state changes
   useEffect(() => {
+    if (formData.state && formData.state.length === 2) {
+      calculateShipping(formData.state);
+    }
+  }, [formData.state]);
+
+  // Calculate final amount with deal, shipping, and tax
+  useEffect(() => {
+    let subtotal = totalAmount || 0;
+    
+    // Apply deal discount
     if (selectedDeal && availableDeals.length > 0) {
       const deal = availableDeals.find(d => d._id === selectedDeal);
       if (deal) {
         let discount = 0;
         if (deal.discountType === "percentage") {
-          discount = (totalAmount * deal.discountValue) / 100;
+          discount = ((totalAmount || 0) * deal.discountValue) / 100;
         } else {
           discount = deal.discountValue;
         }
-        setFinalAmount(Math.max(0, totalAmount - discount));
+        subtotal = Math.max(0, (totalAmount || 0) - discount);
       }
-    } else {
-      setFinalAmount(totalAmount);
     }
-  }, [selectedDeal, totalAmount, availableDeals]);
+    
+    // Add shipping and tax
+    const shippingCost = selectedShipping?.cost || 0;
+    const total = subtotal + shippingCost + taxAmount;
+    setFinalAmount(total);
+  }, [selectedDeal, totalAmount, availableDeals, selectedShipping, taxAmount]);
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
@@ -117,13 +181,37 @@ export default function CheckoutPage() {
   };
 
   const handleSubmitOrder = () => {
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.address) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.address || !formData.city || !formData.state || !formData.zipCode) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required shipping address fields.",
         variant: "destructive",
       });
       return;
+    }
+
+    if (!selectedShipping) {
+      toast({
+        title: "Shipping Required",
+        description: "Please select a shipping method.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Calculate subtotal after deal discount
+    let subtotal = totalAmount || 0;
+    if (selectedDeal && availableDeals.length > 0) {
+      const deal = availableDeals.find(d => d._id === selectedDeal);
+      if (deal) {
+        let discount = 0;
+        if (deal.discountType === "percentage") {
+          discount = ((totalAmount || 0) * deal.discountValue) / 100;
+        } else {
+          discount = deal.discountValue;
+        }
+        subtotal = Math.max(0, (totalAmount || 0) - discount);
+      }
     }
 
     const orderData = {
@@ -136,23 +224,25 @@ export default function CheckoutPage() {
         customerState: formData.state,
         customerZip: formData.zipCode,
         customerCountry: formData.country,
-        total: finalAmount.toFixed(2),
-        status: "pending",
-        paymentMethod: formData.paymentMethod,
+        shippingMethod: selectedShipping?.method,
         specialInstructions: formData.specialInstructions,
-        appliedDeal: selectedDeal || null,
+        subtotal: subtotal.toFixed(2),
+        shipping: (selectedShipping?.cost || 0).toFixed(2),
+        tax: taxAmount.toFixed(2),
+        total: finalAmount.toFixed(2),
+        status: "pending"
       },
       items: items.map(item => ({
-        productId: item.product._id,
+        productId: item.id,
         quantity: item.quantity,
-        price: item.product.price,
+        price: item.price,
       })),
     };
 
     createOrderMutation.mutate(orderData);
   };
 
-  if (items.length === 0) {
+  if (!items || items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
@@ -275,19 +365,75 @@ export default function CheckoutPage() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="state">State</Label>
-                      <Input
-                        id="state"
-                        value={formData.state}
-                        onChange={(e) => handleInputChange("state", e.target.value)}
-                      />
+                      <Label htmlFor="state">State *</Label>
+                      <Select 
+                        value={formData.state} 
+                        onValueChange={(value) => handleInputChange("state", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AL">Alabama</SelectItem>
+                          <SelectItem value="AK">Alaska</SelectItem>
+                          <SelectItem value="AZ">Arizona</SelectItem>
+                          <SelectItem value="AR">Arkansas</SelectItem>
+                          <SelectItem value="CA">California</SelectItem>
+                          <SelectItem value="CO">Colorado</SelectItem>
+                          <SelectItem value="CT">Connecticut</SelectItem>
+                          <SelectItem value="DE">Delaware</SelectItem>
+                          <SelectItem value="FL">Florida</SelectItem>
+                          <SelectItem value="GA">Georgia</SelectItem>
+                          <SelectItem value="HI">Hawaii</SelectItem>
+                          <SelectItem value="ID">Idaho</SelectItem>
+                          <SelectItem value="IL">Illinois</SelectItem>
+                          <SelectItem value="IN">Indiana</SelectItem>
+                          <SelectItem value="IA">Iowa</SelectItem>
+                          <SelectItem value="KS">Kansas</SelectItem>
+                          <SelectItem value="KY">Kentucky</SelectItem>
+                          <SelectItem value="LA">Louisiana</SelectItem>
+                          <SelectItem value="ME">Maine</SelectItem>
+                          <SelectItem value="MD">Maryland</SelectItem>
+                          <SelectItem value="MA">Massachusetts</SelectItem>
+                          <SelectItem value="MI">Michigan</SelectItem>
+                          <SelectItem value="MN">Minnesota</SelectItem>
+                          <SelectItem value="MS">Mississippi</SelectItem>
+                          <SelectItem value="MO">Missouri</SelectItem>
+                          <SelectItem value="MT">Montana</SelectItem>
+                          <SelectItem value="NE">Nebraska</SelectItem>
+                          <SelectItem value="NV">Nevada</SelectItem>
+                          <SelectItem value="NH">New Hampshire</SelectItem>
+                          <SelectItem value="NJ">New Jersey</SelectItem>
+                          <SelectItem value="NM">New Mexico</SelectItem>
+                          <SelectItem value="NY">New York</SelectItem>
+                          <SelectItem value="NC">North Carolina</SelectItem>
+                          <SelectItem value="ND">North Dakota</SelectItem>
+                          <SelectItem value="OH">Ohio</SelectItem>
+                          <SelectItem value="OK">Oklahoma</SelectItem>
+                          <SelectItem value="OR">Oregon</SelectItem>
+                          <SelectItem value="PA">Pennsylvania</SelectItem>
+                          <SelectItem value="RI">Rhode Island</SelectItem>
+                          <SelectItem value="SC">South Carolina</SelectItem>
+                          <SelectItem value="SD">South Dakota</SelectItem>
+                          <SelectItem value="TN">Tennessee</SelectItem>
+                          <SelectItem value="TX">Texas</SelectItem>
+                          <SelectItem value="UT">Utah</SelectItem>
+                          <SelectItem value="VT">Vermont</SelectItem>
+                          <SelectItem value="VA">Virginia</SelectItem>
+                          <SelectItem value="WA">Washington</SelectItem>
+                          <SelectItem value="WV">West Virginia</SelectItem>
+                          <SelectItem value="WI">Wisconsin</SelectItem>
+                          <SelectItem value="WY">Wyoming</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
-                      <Label htmlFor="zipCode">Zip Code</Label>
+                      <Label htmlFor="zipCode">ZIP Code *</Label>
                       <Input
                         id="zipCode"
                         value={formData.zipCode}
                         onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                        required
                       />
                     </div>
                   </div>
@@ -310,10 +456,50 @@ export default function CheckoutPage() {
                     </Select>
                   </div>
 
+                  {/* Shipping Options */}
+                  {formData.state && (
+                    <div className="mt-6">
+                      <Label className="text-base font-semibold">Shipping Options</Label>
+                      {isCalculatingShipping ? (
+                        <div className="mt-2 p-4 border rounded-lg">
+                          <div className="animate-pulse">Calculating shipping rates...</div>
+                        </div>
+                      ) : shippingRates.length > 0 ? (
+                        <div className="mt-2 space-y-2">
+                          {shippingRates.map((rate) => (
+                            <div 
+                              key={rate.method}
+                              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                                selectedShipping?.method === rate.method 
+                                  ? 'border-primary bg-primary/5' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                              onClick={() => setSelectedShipping(rate)}
+                            >
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <div className="font-medium">{rate.description}</div>
+                                  <div className="text-sm text-gray-600">{rate.estimatedDays} business days</div>
+                                </div>
+                                <div className="text-lg font-semibold">
+                                  {rate.cost === 0 ? 'FREE' : `$${rate.cost.toFixed(2)}`}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : formData.state && (
+                        <div className="mt-2 p-4 border rounded-lg text-gray-600">
+                          No shipping rates available for selected state.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <Button
                     onClick={() => setCurrentStep(2)}
                     className="w-full"
-                    disabled={!formData.firstName || !formData.lastName || !formData.email || !formData.address}
+                    disabled={!formData.firstName || !formData.lastName || !formData.email || !formData.address || !formData.city || !formData.state || !formData.zipCode || !selectedShipping}
                   >
                     Continue to Payment
                   </Button>
@@ -463,18 +649,18 @@ export default function CheckoutPage() {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.product._id} className="flex items-center space-x-3">
+                {items.map((item: any) => (
+                  <div key={item.id} className="flex items-center space-x-3">
                     <img
-                      src={item.product.image}
-                      alt={item.product.name}
+                      src={item.image}
+                      alt={item.name}
                       className="w-12 h-12 object-cover rounded"
                     />
                     <div className="flex-1">
-                      <p className="font-medium text-sm">{item.product.name}</p>
+                      <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
-                    <p className="font-medium">${(parseFloat(item.product.price) * item.quantity).toFixed(2)}</p>
+                    <p className="font-medium">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
                   </div>
                 ))}
 
@@ -483,18 +669,46 @@ export default function CheckoutPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${totalAmount.toFixed(2)}</span>
+                    <span>${(totalAmount || 0).toFixed(2)}</span>
                   </div>
-                  {selectedDeal && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Discount</span>
-                      <span>-${(totalAmount - finalAmount).toFixed(2)}</span>
-                    </div>
-                  )}
+                  
+                  {selectedDeal && availableDeals.length > 0 && (() => {
+                    const deal = availableDeals.find(d => d._id === selectedDeal);
+                    if (deal) {
+                      let discount = 0;
+                      if (deal.discountType === "percentage") {
+                        discount = ((totalAmount || 0) * deal.discountValue) / 100;
+                      } else {
+                        discount = deal.discountValue;
+                      }
+                      return (
+                        <div className="flex justify-between text-green-600">
+                          <span>Discount ({deal.discountType === "percentage" ? `${deal.discountValue}%` : `$${deal.discountValue}`})</span>
+                          <span>-${discount.toFixed(2)}</span>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                  
                   <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span>Free</span>
+                    <span>
+                      {selectedShipping ? (
+                        selectedShipping.cost === 0 ? 'FREE' : `$${selectedShipping.cost.toFixed(2)}`
+                      ) : (
+                        'Calculate shipping'
+                      )}
+                    </span>
                   </div>
+                  
+                  {taxAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Tax</span>
+                      <span>${taxAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>

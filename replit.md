@@ -8,6 +8,18 @@ ModernShop is a full-stack e-commerce application built with React, Express, and
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Enhanced Shipping Address & Dynamic Pricing (January 27, 2025)
+- Added comprehensive shipping address collection in checkout process
+- Implemented dynamic price calculation based on shipping location
+- Created shipping zones system (Local, Regional, National, Remote) with different rates
+- Added state tax calculation for accurate pricing
+- Enhanced checkout UI with state dropdown and shipping method selection
+- Updated order schema to include shipping details (phone, state, country, shipping method)
+- Integrated shipping rate API endpoint for real-time calculations
+- Added visual shipping options with estimated delivery times
+
 ## System Architecture
 
 The application follows a monorepo structure with a clear separation between client and server code:
